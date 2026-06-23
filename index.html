@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <meta name="theme-color" content="#0a0a0f" />
+  <title>LORE — Everyone's a main character. Only some become legend.</title>
+  <meta name="description" content="LORE turns you and your friends into the cast of a never-ending series written by an AI showrunner. You make the choices. The world reacts. The fans decide who becomes legend." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;500;600;700;800&family=Playfair+Display:ital,wght@1,600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/styles.css" />
+</head>
+<body>
+  <!-- Animated cinematic background -->
+  <div class="bg-grain"></div>
+  <div class="bg-glow glow-a"></div>
+  <div class="bg-glow glow-b"></div>
+  <div class="bg-glow glow-c"></div>
+
+  <!-- Phone frame: the whole product lives inside a vertical "screen" -->
+  <main id="app" class="phone">
+    <div id="screen" class="screen"><!-- views injected here --></div>
+    <nav id="tabbar" class="tabbar hidden">
+      <button class="tab" data-view="home">      <span class="ico">▶</span><span>Series</span></button>
+      <button class="tab" data-view="feed">      <span class="ico">✦</span><span>Trending</span></button>
+      <button class="tab" data-view="cast">      <span class="ico">✚</span><span>Cast</span></button>
+      <button class="tab" data-view="profile">   <span class="ico">★</span><span>You</span></button>
+    </nav>
+  </main>
+
+  <div id="toast" class="toast"></div>
+
+  <script src="js/data.js"></script>
+  <script src="js/engine.js"></script>
+  <script src="js/store.js"></script>
+  <script src="js/ui.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
