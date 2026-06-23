@@ -21,6 +21,7 @@
   let castRel = "ally";    // selected relationship in cast form
   let incomingInvite = null;   // parsed from ?join= link
   let pendingInviter = null;   // inviter to add after onboarding
+  let discoverList = [];       // cached Discover creators for current view
 
   /* ---------------- render ---------------- */
   function render(){
@@ -36,6 +37,7 @@
     tabbar.classList.remove("hidden");
     if(route==="home")    screen.innerHTML = UI.viewHome();
     if(route==="feed")    screen.innerHTML = UI.viewFeed();
+    if(route==="discover"){ discoverList = E.buildDiscover(S.state); screen.innerHTML = UI.viewDiscover(discoverList); }
     if(route==="room")    screen.innerHTML = UI.viewRoom();
     if(route==="cast")    screen.innerHTML = UI.viewCast();
     if(route==="profile") screen.innerHTML = UI.viewProfile();
@@ -126,6 +128,19 @@
     checkAchievements(null,null);
   }
 
+  /* ---------------- Discover / Guest Star ---------------- */
+  function guestStar(i){
+    const st=S.state; const creator=discoverList[i]; if(!creator) return;
+    sfx("whoosh");
+    st.activeEp = E.generateGuestEpisode(st, creator);
+    consumeTwist(st.activeEp);
+    S.unlock("gueststar"); S.save();
+    route="home"; render();
+    setTimeout(()=>{ const el=document.getElementById("ep-"+st.activeEp.num); if(el) el.scrollIntoView({behavior:"smooth",block:"start"}); }, 80);
+    UI.toast(`<span class="tt">🎬 Guesting on ${UI.esc(creator.handle)}</span> · their fans are watching — make it count`);
+    checkAchievements(null,null);
+  }
+
   /* ---------------- Writers' Room Sabotage ---------------- */
   function injectSabotage(i){
     const st=S.state; const today=new Date().toDateString();
@@ -147,6 +162,12 @@
 
     const prevTier = E.tierForFans(st.fans).id;
     const score = E.applyChoice(st, choice);
+    // guesting on a bigger creator exposes you to their audience
+    if(ep.isGuest && ep.hostFans){
+      const boost = Math.round(ep.hostFans*(0.01+Math.random()*0.02));
+      score.newFans += boost; score.views += Math.round(ep.hostFans*(0.05+Math.random()*0.1));
+      st.fans += boost; st.views += Math.round(ep.hostFans*0.05);
+    }
     ep.views = score.views; ep.likes = score.likes; ep.newFans = score.newFans;
     ep.chosen = choice.t; ep.viral = score.viral;
     ep.comments = E.genFanComments(st, ep, score);
@@ -300,6 +321,9 @@
 
     const sabBtn = e.target.closest("[data-sabotage]");
     if(sabBtn){ injectSabotage(parseInt(sabBtn.dataset.sabotage,10)); return; }
+
+    const guestBtn = e.target.closest("[data-guest]");
+    if(guestBtn){ guestStar(parseInt(guestBtn.dataset.guest,10)); return; }
 
     const tab = e.target.closest(".tab");
     if(tab){ sfx("tap"); route = tab.dataset.view; render(); return; }

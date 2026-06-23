@@ -13,6 +13,7 @@
       .replace(/\{you\}/g, `<span class="nm">${ctx.you}</span>`)
       .replace(/\{world2\}/g, ctx.world2 || "another world")
       .replace(/\{world\}/g, ctx.world)
+      .replace(/\{host\}/g, ctx.host ? `<span class="nm">${ctx.host}</span>` : "the host")
       .replace(/\{co\}/g, ctx.co ? `<span class="nm">${ctx.co}</span>` : "someone")
       .replace(/\{a\}/g, ctx.a || "them")
       .replace(/\{b\}/g, ctx.b || "the other one");
@@ -168,6 +169,57 @@
     return {
       num:epNum, season, epInSeason:((epNum-1)%6)+1, isCrossover:true,
       title, badge:`S${season} · CROSSOVER`, world:`${world.name} × ${w2.name}`, worldId:w2.id,
+      palette, grad:grad(arch.g), art,
+      scenes, cliff: fill(rnd(D.cliffs), ctx), choices,
+      coName: co?co.name:null, ts:Date.now(),
+    };
+  }
+
+  /* ---- DISCOVER: other creators' series you can guest in ---- */
+  function buildDiscover(state){
+    const handles = D.feedNames.slice();
+    const list=[];
+    const pick = ()=> handles.splice(Math.floor(Math.random()*handles.length),1)[0];
+    for(let i=0;i<8 && handles.length;i++){
+      const handle = pick();
+      const arch = rnd(D.archetypes);
+      const world = rnd(D.worlds);
+      const fans = rint(1,90)*1000 + rint(0,999);
+      const palette=[arch.g[0],arch.g[1],arch.accent||"#ff7eb6"];
+      const art = window.LORE_ART
+        ? window.LORE_ART.forEpisode({title:handle+world.id, world:world.id, palette})
+        : grad(arch.g);
+      list.push({
+        handle, archId:arch.id, worldId:world.id, worldName:world.name,
+        archName:arch.name, fans, season: rint(1,5),
+        tag: rnd(D.creatorTaglines), tier: tierForFans(fans).name, art, palette,
+      });
+    }
+    // hottest first
+    return list.sort((a,b)=>b.fans-a.fans);
+  }
+
+  // generate a playable GUEST episode set in the host's world, starring you
+  function generateGuestEpisode(state, creator){
+    const arch  = D.archetypes.find(a=>a.id===state.archetype) || D.archetypes[0];
+    const hostWorld = D.worlds.find(w=>w.id===creator.worldId) || D.worlds[0];
+    const co = featuredCostar(state);
+    const ctx = { you: state.name||"You", world: hostWorld.name, host: creator.handle, co: co?co.name:null };
+
+    const scenes = [ {t: fill(rnd(D.guestOpens), ctx), cls:""},
+                     {t: fill(rnd(D.guestBeats), ctx), cls:""} ];
+    const set = rnd(D.choiceSets.filter((_,i)=>i!==1)); // avoid the explicit love-pick set
+    const choices = set.map(c=>({ t: fill(c.t, ctx), k:c.k, tag:c.tag, eff:c.eff, coId: co?co.id:null }));
+
+    const epNum=(state.episodes?.length||0)+1;
+    const season=Math.floor((epNum-1)/6)+1;
+    const title=`GUEST: ${state.name||"You"} on ${creator.handle}`;
+    const palette=[arch.g[0], hostWorld.g[1], arch.accent||"#ff7eb6"];
+    const art = window.LORE_ART ? window.LORE_ART.forEpisode({title, world:hostWorld.id, palette}) : grad(arch.g);
+
+    return {
+      num:epNum, season, epInSeason:((epNum-1)%6)+1, isGuest:true, host:creator.handle, hostFans:creator.fans,
+      title, badge:`GUEST · ${creator.handle}`, world:hostWorld.name, worldId:hostWorld.id,
       palette, grad:grad(arch.g), art,
       scenes, cliff: fill(rnd(D.cliffs), ctx), choices,
       coName: co?co.name:null, ts:Date.now(),
@@ -347,6 +399,6 @@
     generateEpisode, applyChoice, scoreEpisode, runWhileAway,
     buildFeed, tierForFans, nextTier, grad, rnd, rint,
     genFanComments, writersToday, generateRetcon, resolveDuel, reportBug,
-    generateCrossover
+    generateCrossover, buildDiscover, generateGuestEpisode
   };
 })();

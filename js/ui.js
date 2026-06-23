@@ -178,6 +178,7 @@
           ${ep.isRetcon?'<span class="retcon-tag">↺ RETCON</span>':''}
           ${ep.isDuel?`<span class="duel-tag ${ep.won?'won':'lost'}">⚔️ DUEL · ${ep.won?'WON':'LOST'}</span>`:''}
           ${ep.isCrossover?'<span class="crossover-tag">🌀 CROSSOVER</span>':''}
+          ${ep.isGuest?`<span class="guest-tag">🎬 GUEST · ${esc(ep.host||"")}</span>`:''}
           ${ep._ai?'<span class="ai-tag">✨ LIVE AI</span>':''}
           <span class="ep-badge">${esc(ep.badge)} · ${esc(ep.world)}</span>
           <h2 class="ep-title">${esc(ep.title)}</h2>
@@ -281,6 +282,34 @@
           <button class="btn" data-act="add-costar">+ Cast & send invite</button>
         </div>
         <p class="foot">In the full app this sends a real invite — your friend approves their character before they appear. Double opt-in, no deepfakes.</p>
+      </div>`;
+  }
+
+  /* ---------------- DISCOVER ---------------- */
+  function viewDiscover(list){
+    list = list || [];
+    const cards = list.map((c,i)=>`
+      <div class="disc">
+        <div class="disc-art" style="background:${c.art}">
+          <span class="disc-fans">${fmt(c.fans)} fans</span>
+        </div>
+        <div class="disc-body">
+          <div class="disc-handle">${esc(c.handle)}</div>
+          <div class="disc-meta">${esc(c.archName)} · ${esc(c.worldName)} · S${c.season}</div>
+          <div class="disc-tag muted">${esc(c.handle)} ${esc(c.tag)}</div>
+          <button class="btn sm gold disc-guest" data-guest="${i}">🎬 Guest star</button>
+        </div>
+      </div>`).join("");
+    return `
+      <div class="view">
+        ${topbar()}
+        <div class="pad">
+          <div class="kicker" style="color:var(--accent-2)">Discover</div>
+          <h1 class="title-l" style="margin:8px 0 4px">Other people's<br>stories</h1>
+          <p class="muted" style="font-size:14px">Guest-star in a creator's series. You bring your fans, they bring theirs — both blow up.</p>
+        </div>
+        <div class="disc-grid">${cards}</div>
+        <p class="foot">Every guest spot is a crossover of audiences. This is how worlds connect.</p>
       </div>`;
   }
 
@@ -504,7 +533,7 @@
 
   window.LORE_UI = {
     viewIntro, viewOnboardName, viewOnboardArchetype, viewOnboardWorld, viewGenerating,
-    viewHome, viewFeed, viewRoom, viewCast, viewProfile, episodeCard,
+    viewHome, viewFeed, viewDiscover, viewRoom, viewCast, viewProfile, episodeCard,
     plusSheet, settingsSheet, inviteSheet, toast,
     avatarStyle, initial, esc,
   };

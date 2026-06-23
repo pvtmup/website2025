@@ -58,6 +58,25 @@ window.LORE_DATA = {
     { id:"caster",    icon:"📨", t:"Casting Director",     d:"A friend accepted their role in your series." },
     { id:"saboteur",  icon:"🕵️", t:"The Saboteur",         d:"You injected an anonymous twist into the canon." },
     { id:"crossover", icon:"🌀", t:"Cursed Crossover",     d:"You collided two worlds into one cursed episode." },
+    { id:"gueststar", icon:"🎬", t:"Guest Star",           d:"You guest-starred in someone else's series." },
+  ],
+
+  // DISCOVER — other creators' ongoing series you can guest-star in
+  creatorTaglines: [
+    " in their villain era","fresh off a season finale","the most shipped cast this week",
+    "down bad and trending","one betrayal from CANON","rewriting their whole lore",
+    "currently at war with their own cast","accidentally went viral last night",
+  ],
+  guestOpens: [
+    "{you} pulled up to {host}'s world uninvited — and stole the entire scene.",
+    "{host} did NOT plan for {you} to show up. The fans did though.",
+    "One guest slot opened in {host}'s series. {you} kicked the door in.",
+    "{you} walked onto {host}'s set like they owned it. Honestly? They kind of did now.",
+  ],
+  guestBeats: [
+    "{host}'s cast didn't know whether to clap or run. {you} just smiled.",
+    "Half of {host}'s fans switched allegiance the second {you} spoke.",
+    "{host} tried to keep control of their own story. {you} had other plans.",
   ],
 
   // WRITERS' ROOM SABOTAGE — drop an anonymous chaos twist nobody can trace
