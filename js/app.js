@@ -100,8 +100,43 @@
     } else {
       st.activeEp = E.generateEpisode(st);
     }
+    consumeTwist(st.activeEp);
     S.save(); render();
     setTimeout(()=>{ const e=document.getElementById("ep-"+st.activeEp.num); if(e) e.scrollIntoView({behavior:"smooth",block:"start"}); }, 60);
+  }
+
+  // an injected anonymous twist lands at the top of the next episode
+  function consumeTwist(ep){
+    const st=S.state;
+    if(st.pendingTwist){
+      ep.scenes.unshift({ t:`The room's anonymous twist lands: <span class="nm">${UI.esc(st.pendingTwist)}</span>`, cls:"dir" });
+      st.pendingTwist=null;
+    }
+  }
+
+  /* ---------------- Cursed Crossover ---------------- */
+  function doCrossover(){
+    const st=S.state;
+    sfx("whoosh");
+    st.activeEp=E.generateCrossover(st);
+    consumeTwist(st.activeEp);
+    S.unlock("crossover"); S.save(); render();
+    setTimeout(()=>{ const e=document.getElementById("ep-"+st.activeEp.num); if(e) e.scrollIntoView({behavior:"smooth",block:"start"}); }, 60);
+    UI.toast(`<span class="tt">🌀 Worlds colliding</span> · ${UI.esc(st.activeEp.world)}`);
+    checkAchievements(null,null);
+  }
+
+  /* ---------------- Writers' Room Sabotage ---------------- */
+  function injectSabotage(i){
+    const st=S.state; const today=new Date().toDateString();
+    if(st.sabotageDay===today){ sfx("error"); UI.toast("You've already sabotaged the room today."); return; }
+    const txt=(D.sabotageOptions[i]||"").replace(/\{you\}/g, st.name||"you");
+    st.sabotageDay=today; st.pendingTwist=txt;
+    const bonus=Math.round(50+st.fans*0.01);
+    st.fans+=bonus; S.unlock("saboteur"); S.save();
+    sfx("pick"); render();
+    UI.toast(`<span class="tt">🕵️ Twist injected</span> +${S.fmt(bonus)} chaos · nobody knows it was you`);
+    checkAchievements(null,null);
   }
 
   function playChoice(idx){
@@ -263,6 +298,9 @@
     const duelBtn = e.target.closest("[data-duel]");
     if(duelBtn){ startDuel(duelBtn.dataset.duel); return; }
 
+    const sabBtn = e.target.closest("[data-sabotage]");
+    if(sabBtn){ injectSabotage(parseInt(sabBtn.dataset.sabotage,10)); return; }
+
     const tab = e.target.closest(".tab");
     if(tab){ sfx("tap"); route = tab.dataset.view; render(); return; }
 
@@ -279,6 +317,7 @@
       else if(a==="arch-next"){ if(!draft.archetype) return; onbStep="world"; render(); }
       else if(a==="world-next"){ if(!draft.world) return; generatingThenHome(); }
       else if(a==="next-ep"){ shootNext(); }
+      else if(a==="crossover"){ doCrossover(); }
       else if(a==="add-costar"){ addCostar(); }
       else if(a==="share-invite"){ shareInvite(act.dataset.id); }
       else if(a==="accept-costar"){ acceptCostar(act.dataset.id); }

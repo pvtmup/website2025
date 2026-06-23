@@ -177,6 +177,7 @@
           ${ep.isFinale?'<span class="finale-tag">SEASON FINALE</span>':''}
           ${ep.isRetcon?'<span class="retcon-tag">↺ RETCON</span>':''}
           ${ep.isDuel?`<span class="duel-tag ${ep.won?'won':'lost'}">⚔️ DUEL · ${ep.won?'WON':'LOST'}</span>`:''}
+          ${ep.isCrossover?'<span class="crossover-tag">🌀 CROSSOVER</span>':''}
           ${ep._ai?'<span class="ai-tag">✨ LIVE AI</span>':''}
           <span class="ep-badge">${esc(ep.badge)} · ${esc(ep.world)}</span>
           <h2 class="ep-title">${esc(ep.title)}</h2>
@@ -197,7 +198,11 @@
     if(active){
       body += episodeCard(active, false);
     } else {
-      body += `<div class="pad"><button class="btn gold" data-act="next-ep">▶ Shoot the next episode</button></div>`;
+      body += `<div class="pad">
+        <button class="btn gold" data-act="next-ep">▶ Shoot the next episode</button>
+        <div style="height:10px"></div>
+        <button class="btn ghost" data-act="crossover">🌀 Cursed Crossover — collide two worlds</button>
+      </div>`;
     }
     if(history.length){
       body += `<h2 class="sec">Previously on your series</h2>`;
@@ -318,8 +323,32 @@
             ? `<div class="card center" style="margin:6px 0 0"><b style="color:var(--accent-2)">Vote locked in 🔒</b><br><span class="muted" style="font-size:13px">The showrunner writes the winner into everyone's next season. Come back tomorrow for a new vote.</span></div>`
             : `<p class="muted" style="font-size:13px">${friends?`${esc(friends)} and `:""}${E.rint(2,40)}k creators are voting right now. Pick before the room closes.</p>`}
         </div>
+
+        ${sabotageBlock()}
+
         <p class="foot">Daily collective storytelling. The crowd writes the canon — together.</p>
       </div>`;
+  }
+
+  function sabotageBlock(){
+    const st = S.state;
+    const today = new Date().toDateString();
+    const done = st.sabotageDay===today;
+    if(done){
+      return `
+        <h2 class="sec">🕵️ Anonymous twist · injected</h2>
+        <div class="card sabotage-done" style="margin-top:0">
+          <div class="muted" style="font-size:12px;margin-bottom:6px">Someone slipped this into tonight's canon. Nobody knows who.</div>
+          <div style="font-weight:700;font-size:15px">"${esc(st.pendingTwist||"...")}"</div>
+          <div class="faint" style="font-size:11px;margin-top:8px">(it was you 🤫) — it hits in your next episode.</div>
+        </div>`;
+    }
+    const opts = D.sabotageOptions.slice(0,4).map((o,i)=>`
+      <button class="sab-opt" data-sabotage="${i}">🕵️ ${esc(o.replace(/\{you\}/g, st.name||"you"))}</button>`).join("");
+    return `
+      <h2 class="sec">🕵️ Sabotage the room</h2>
+      <p class="muted pad" style="font-size:13px;margin-top:-2px">Drop one anonymous twist into tonight's canon. It becomes real — and nobody can trace it to you. Once a day.</p>
+      <div class="sabs">${opts}</div>`;
   }
 
   /* ---------------- PROFILE ---------------- */

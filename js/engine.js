@@ -11,6 +11,7 @@
   function fill(tpl, ctx){
     return tpl
       .replace(/\{you\}/g, `<span class="nm">${ctx.you}</span>`)
+      .replace(/\{world2\}/g, ctx.world2 || "another world")
       .replace(/\{world\}/g, ctx.world)
       .replace(/\{co\}/g, ctx.co ? `<span class="nm">${ctx.co}</span>` : "someone")
       .replace(/\{a\}/g, ctx.a || "them")
@@ -138,6 +139,38 @@
       cliff: f(rnd(D.retconCliffs)),
       choices:[], coName: costar.name, chosen:"Rewrote the past",
       ts: Date.now(),
+    };
+  }
+
+  /* ---- CURSED CROSSOVER: collide your world with another ---- */
+  function generateCrossover(state){
+    const arch  = D.archetypes.find(a=>a.id===state.archetype) || D.archetypes[0];
+    const world = D.worlds.find(w=>w.id===state.world) || D.worlds[0];
+    const others= D.worlds.filter(w=>w.id!==world.id);
+    const w2    = rnd(others);
+    const co    = featuredCostar(state);
+    const ctx = { you: state.name||"You", world: world.name, world2: w2.name, co: co?co.name:null };
+
+    const scenes = [ {t: fill(rnd(D.crossoverOpens), ctx), cls:""} ];
+    scenes.push(co
+      ? {t: fill(rnd(D.beats[co.rel]), {...ctx, co:co.name}), cls:""}
+      : {t: fill(rnd(D.solo), ctx), cls:""});
+
+    const set = D.choiceSets[3]; // chaos / power / honest
+    const choices = set.map(c=>({ t: fill(c.t, ctx), k:c.k, tag:c.tag, eff:c.eff, coId: co?co.id:null }));
+
+    const epNum = (state.episodes?.length||0)+1;
+    const season= Math.floor((epNum-1)/6)+1;
+    const title = `CROSSOVER: ${world.name} × ${w2.name}`;
+    const palette = [arch.g[0], w2.g[1], arch.accent || "#a98bff"];
+    const art = window.LORE_ART ? window.LORE_ART.forEpisode({title, world:w2.id, palette}) : grad(arch.g);
+
+    return {
+      num:epNum, season, epInSeason:((epNum-1)%6)+1, isCrossover:true,
+      title, badge:`S${season} · CROSSOVER`, world:`${world.name} × ${w2.name}`, worldId:w2.id,
+      palette, grad:grad(arch.g), art,
+      scenes, cliff: fill(rnd(D.cliffs), ctx), choices,
+      coName: co?co.name:null, ts:Date.now(),
     };
   }
 
@@ -313,6 +346,7 @@
   window.LORE_ENGINE = {
     generateEpisode, applyChoice, scoreEpisode, runWhileAway,
     buildFeed, tierForFans, nextTier, grad, rnd, rint,
-    genFanComments, writersToday, generateRetcon, resolveDuel, reportBug
+    genFanComments, writersToday, generateRetcon, resolveDuel, reportBug,
+    generateCrossover
   };
 })();

@@ -295,6 +295,18 @@ label.lab{font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(
 .mini.gold{background:linear-gradient(135deg,#ffd66b,#ff9d3d);color:#1a1206;border-color:transparent}
 .mini.danger{background:rgba(255,77,109,.12);border-color:rgba(255,77,109,.4);color:var(--hot)}
 
+/* crossover */
+.crossover-tag{position:absolute;top:12px;left:12px;z-index:2;background:linear-gradient(135deg,#a98bff,#19e6c1);
+  color:#0a0a0f;font-weight:900;font-size:10px;letter-spacing:.08em;padding:5px 9px;border-radius:999px}
+
+/* sabotage */
+.sabs{display:flex;flex-direction:column;gap:9px;padding:4px 20px 4px}
+.sab-opt{text-align:left;background:rgba(169,139,255,.08);border:1px solid rgba(169,139,255,.3);color:var(--ink);
+  font:inherit;font-size:13.5px;font-weight:600;line-height:1.4;padding:13px 14px;border-radius:14px;cursor:pointer;transition:.16s}
+.sab-opt:active{transform:scale(.99)}
+.sab-opt:hover{border-color:var(--secret);background:rgba(169,139,255,.16)}
+.sabotage-done{border-color:rgba(169,139,255,.4);background:linear-gradient(160deg,rgba(169,139,255,.12),var(--card))}
+
 .fans-wrap{padding:14px 18px 4px;border-top:1px solid var(--line)}
 .fc{display:flex;gap:10px;margin-bottom:11px}
 .fc-av{width:30px;height:30px;border-radius:10px;flex:none;display:flex;align-items:center;justify-content:center;

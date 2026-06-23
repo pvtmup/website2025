@@ -56,6 +56,25 @@ window.LORE_DATA = {
     { id:"canonduel", icon:"⚔️", t:"Canon Duel",          d:"You took a story dispute to the room — and won." },
     { id:"bughunter", icon:"🐛", t:"Lore Bug Bounty",     d:"You caught the showrunner slipping. Iconic." },
     { id:"caster",    icon:"📨", t:"Casting Director",     d:"A friend accepted their role in your series." },
+    { id:"saboteur",  icon:"🕵️", t:"The Saboteur",         d:"You injected an anonymous twist into the canon." },
+    { id:"crossover", icon:"🌀", t:"Cursed Crossover",     d:"You collided two worlds into one cursed episode." },
+  ],
+
+  // WRITERS' ROOM SABOTAGE — drop an anonymous chaos twist nobody can trace
+  sabotageOptions: [
+    "Everyone secretly swaps loyalties before the night is over.",
+    "A character everyone thought was gone walks back in.",
+    "The whole world finds out {you}'s biggest secret at once.",
+    "Two sworn enemies are forced to team up — or lose everything.",
+    "Someone proposes. Loudly. To absolutely the wrong person.",
+    "The lights cut, and when they return, one person is missing.",
+  ],
+
+  // CURSED CROSSOVER — collide your world with another
+  crossoverOpens: [
+    "Reality glitched. {world} bled straight into {world2}, and {you} was standing on the seam.",
+    "Nobody asked for {world} and {world2} to collide. {you} got the front-row seat anyway.",
+    "Two worlds, one night. {you} woke up in {world}, but the rules of {world2} came with.",
   ],
 
   // RETCON WAR — rewrite the past, flip a co-star into the villain
