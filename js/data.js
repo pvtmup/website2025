@@ -52,6 +52,22 @@ window.LORE_DATA = {
     { id:"viral",     icon:"🚀", t:"Gone Viral",          d:"A clip of yours left the app." },
     { id:"legend",    icon:"👑", t:"Legend of the Season",d:"You climbed past 7,000 fans." },
     { id:"canon",     icon:"🏛️", t:"Written into Canon",  d:"You are now permanent LORE." },
+    { id:"retconwar", icon:"↺",  t:"Retcon War",          d:"You rewrote the past. History is yours now." },
+  ],
+
+  // RETCON WAR — rewrite the past, flip a co-star into the villain
+  retconTitles: ["RETCON: {co} Was Always the Villain","RETCON: The Truth About {co}",
+                 "RETCON: {co}, Rewritten","RETCON: Everyone Forgot What {co} Did"],
+  retconScenes: [
+    "Turns out the story was never what you thought. {co} set all of it up. You just hadn't noticed.",
+    "New canon, effective immediately: {co} was the problem the whole time. The receipts were always there.",
+    "You rewound the tape. Frame by frame, {co}'s smile gets worse. The fans see it now too.",
+    "One edit and the whole season flips. {co} isn't the friend anymore. {co} is the reason.",
+  ],
+  retconCliffs: [
+    "{co} just got the notification. The reply is going to be ugly.",
+    "Half the fandom switched sides in an hour. {co} has no idea yet.",
+    "Somewhere, {co} is screenshotting this for a comeback. Good luck.",
   ],
 
   /* ---------------- NARRATIVE GRAMMAR ----------------

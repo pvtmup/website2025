@@ -108,6 +108,35 @@
     };
   }
 
+  /* ---- RETCON: rewrite the past, flip a co-star to villain ---- */
+  function generateRetcon(state, costar){
+    const arch  = D.archetypes.find(a=>a.id===state.archetype) || D.archetypes[0];
+    const world = D.worlds.find(w=>w.id===state.world) || D.worlds[0];
+    const ctx = { co: costar.name };
+    const f = (t)=> t.replace(/\{co\}/g, `<span class="nm">${costar.name}</span>`);
+    const ft = (t)=> t.replace(/\{co\}/g, costar.name);
+
+    // the flip
+    costar.rel = "rival"; costar.heat = (costar.heat||0) + 5;
+
+    const epNum = (state.episodes?.length || 0) + 1;
+    const epInSeason = ((epNum-1) % 6) + 1;
+    const season = Math.floor((epNum-1)/6) + 1;
+    const title = ft(rnd(D.retconTitles));
+    const palette = [arch.g[0], "#3a0a14", "#ff4d6d"]; // villain-red accent
+    const art = window.LORE_ART ? window.LORE_ART.forEpisode({ title, world: world.id, palette }) : grad(arch.g);
+
+    return {
+      num: epNum, season, epInSeason, isFinale:false, isRetcon:true,
+      title, badge:`S${season} · RETCON`, world: world.name, worldId: world.id,
+      palette, grad: grad(arch.g), art,
+      scenes:[ {t:f(rnd(D.retconScenes)), cls:""} ],
+      cliff: f(rnd(D.retconCliffs)),
+      choices:[], coName: costar.name, chosen:"Rewrote the past",
+      ts: Date.now(),
+    };
+  }
+
   /* ---- generate fan reactions for a played episode ---- */
   function genFanComments(state, ep, score){
     const co = ep.coName;
@@ -233,6 +262,6 @@
   window.LORE_ENGINE = {
     generateEpisode, applyChoice, scoreEpisode, runWhileAway,
     buildFeed, tierForFans, nextTier, grad, rnd, rint,
-    genFanComments, writersToday
+    genFanComments, writersToday, generateRetcon
   };
 })();

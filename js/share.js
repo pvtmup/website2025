@@ -55,6 +55,10 @@
     g.fillStyle="#c9c7e0"; g.font="italic 40px Georgia, serif";
     y=wrap(g, scene, 64, y+90, W-128, 56);
 
+    // hook caption — engagement bait for the feed
+    g.fillStyle="#ff4d6d"; g.font="800 38px Inter, sans-serif";
+    g.fillText("WHAT WOULD YOU DO?", 64, y+78);
+
     // stats row
     g.font="700 46px Inter, sans-serif"; g.fillStyle="#fff";
     const sy=H-220;
@@ -76,7 +80,7 @@
       if(navigator.canShare){
         const blob=await (await fetch(data)).blob();
         const file=new File([blob], "lore-episode.png", {type:"image/png"});
-        if(navigator.canShare({files:[file]})){ await navigator.share({files:[file], title:"LORE", text:"My episode just dropped 🎬"}); return "shared"; }
+        if(navigator.canShare({files:[file]})){ await navigator.share({files:[file], title:"LORE", text:`${ep.title} — what would you do? 🎬 made on LORE`}); return "shared"; }
       }
     }catch(e){}
     const a=document.createElement("a"); a.href=data; a.download=`LORE-${(ep.title||"episode").replace(/\s+/g,"-")}.png`; a.click();

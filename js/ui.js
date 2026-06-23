@@ -157,7 +157,8 @@
           <span>👁 <b class="mono">${fmt(ep.views)}</b></span>
           <span>❤️ <b class="mono">${fmt(ep.likes)}</b></span>
           <span>📈 <b class="mono">+${fmt(ep.newFans||0)}</b></span>
-          <button class="share-btn" data-share="${ep.num}">⇪ Share clip</button>
+          ${ep.isRetcon?'':`<button class="retcon-btn" data-retcon="${ep.num}">↺ Retcon</button>`}
+          <button class="share-btn" data-share="${ep.num}">⇪ Share</button>
         </div>
         ${fanBlock(ep)}`;
     } else {
@@ -171,9 +172,10 @@
         <div class="choices">${choices}</div>`;
     }
     return `
-      <article class="ep ${ep.isFinale?'finale':''}" id="ep-${ep.num}">
+      <article class="ep ${ep.isFinale?'finale':''} ${ep.isRetcon?'retcon':''}" id="ep-${ep.num}">
         <div class="ep-poster" style="background:${bg}">
           ${ep.isFinale?'<span class="finale-tag">SEASON FINALE</span>':''}
+          ${ep.isRetcon?'<span class="retcon-tag">↺ RETCON</span>':''}
           ${ep._ai?'<span class="ai-tag">✨ LIVE AI</span>':''}
           <span class="ep-badge">${esc(ep.badge)} · ${esc(ep.world)}</span>
           <h2 class="ep-title">${esc(ep.title)}</h2>
@@ -286,13 +288,16 @@
     }).join("");
 
     const friends = st.cast.slice(0,3).map(c=>c.name).join(", ");
+    const weight = Math.min(5, st.streak||1);
     return `
       <div class="view">
         ${topbar()}
         <div class="pad">
-          <div class="kicker" style="color:var(--gold)">Writers' Room · today</div>
+          <div class="spread"><div class="kicker" style="color:var(--gold)">Writers' Room · today</div>
+            <span class="weight-chip">🔥 vote ×${weight}</span></div>
           <h1 class="title-l" style="margin:8px 0 4px">Shape what<br>happens next</h1>
           <p class="muted" style="font-size:14px">${esc(wt.setup)}</p>
+          <p class="faint" style="font-size:12px;margin-top:6px">Your daily streak makes your vote weigh <b style="color:var(--gold)">${weight}×</b>. Show up every day to out-vote the room.</p>
         </div>
         <div class="polls">${opts}</div>
         <div class="pad">

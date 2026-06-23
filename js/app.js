@@ -138,6 +138,7 @@
     if(st.episodes.length>=1) grab("pilot");
     if(st.fans>=100)  grab("firstfan");
     if(st.cast.length>=1) grab("costar");
+    if((st.episodes||[]).some(e=>e.isRetcon)) grab("retconwar");
     if(score && (score.views>=10000)) grab("cliff");
     if(score && score.viral) grab("viral");
     if(choice && choice.tag==="villain") grab("villain");
@@ -193,6 +194,9 @@
 
     const shareBtn = e.target.closest("[data-share]");
     if(shareBtn){ shareEpisode(parseInt(shareBtn.dataset.share,10)); return; }
+
+    const retconBtn = e.target.closest("[data-retcon]");
+    if(retconBtn){ doRetcon(parseInt(retconBtn.dataset.retcon,10)); return; }
 
     const tab = e.target.closest(".tab");
     if(tab){ sfx("tap"); route = tab.dataset.view; render(); return; }
@@ -252,10 +256,39 @@
     const st=S.state; const wt=E.writersToday(st);
     if(st.writersDay===wt.day) return;
     st.writersDay=wt.day; st.writersChoice=idx;
-    const bonus = Math.round(40 + st.fans*0.02*(wt.options[idx]?.eff||1));
+    const weight = Math.min(5, st.streak||1);
+    const bonus = Math.round((40 + st.fans*0.02*(wt.options[idx]?.eff||1)) * weight);
     st.fans += bonus; S.save();
     sfx("fans"); render();
-    UI.toast(`<span class="tt">Vote counted</span> +${S.fmt(bonus)} influence · the room is writing it in`);
+    UI.toast(`<span class="tt">Vote ×${weight} counted</span> +${S.fmt(bonus)} influence · the room is writing it in`);
+  }
+
+  /* ---------------- RETCON WAR ---------------- */
+  function doRetcon(num){
+    const st=S.state;
+    const src=(st.episodes||[]).find(e=>e.num===num); if(!src) return;
+    // pick a target: the episode's co-star, else a non-rival cast member, else anyone
+    let target = st.cast.find(c=>c.name===src.coName)
+              || st.cast.find(c=>c.rel!=="rival")
+              || st.cast[0];
+    if(!target){ sfx("error"); UI.toast("Retcon needs a co-star — cast a friend first."); route="cast"; render(); return; }
+    if(!confirm(`Rewrite the past and turn ${target.name} into the villain? This can't be undone — they'll know.`)) return;
+
+    const ep = E.generateRetcon(st, target);
+    const score = E.scoreEpisode(st, {eff:{fans:1.9}});
+    if(!score.viral && Math.random()<0.5){ score.viral=true; score.views=Math.max(score.views, E.rint(12000,50000)); }
+    st.fans += score.newFans; st.views += score.views; st.likes += score.likes;
+    ep.views=score.views; ep.likes=score.likes; ep.newFans=score.newFans; ep.viral=score.viral;
+    ep.chosen="betrayal retcon";
+    ep.comments=E.genFanComments(st, ep, score);
+    st.episodes.push(ep);
+    S.touchDay(); S.save();
+
+    sfx(score.viral?"viral":"achieve");
+    render();
+    setTimeout(()=>{ const el=document.getElementById("ep-"+ep.num); if(el) el.scrollIntoView({behavior:"smooth",block:"center"}); }, 80);
+    UI.toast(`<span class="tt">↺ History rewritten</span> · ${UI.esc(target.name)} is the villain now · ${S.fmt(score.views)} views`);
+    checkAchievements(null, score);
   }
 
   /* ---------------- share ---------------- */
