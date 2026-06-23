@@ -176,6 +176,7 @@
         <div class="ep-poster" style="background:${bg}">
           ${ep.isFinale?'<span class="finale-tag">SEASON FINALE</span>':''}
           ${ep.isRetcon?'<span class="retcon-tag">↺ RETCON</span>':''}
+          ${ep.isDuel?`<span class="duel-tag ${ep.won?'won':'lost'}">⚔️ DUEL · ${ep.won?'WON':'LOST'}</span>`:''}
           ${ep._ai?'<span class="ai-tag">✨ LIVE AI</span>':''}
           <span class="ep-badge">${esc(ep.badge)} · ${esc(ep.world)}</span>
           <h2 class="ep-title">${esc(ep.title)}</h2>
@@ -237,14 +238,26 @@
   }
   function viewCast(){
     const st = S.state;
-    const list = st.cast.length ? st.cast.map(c=>`
-      <div class="costar">
+    const list = st.cast.length ? st.cast.map(c=>{
+      const pending = c.status==="pending";
+      const actions = pending
+        ? `<div class="costar-actions">
+             <button class="mini gold" data-act="share-invite" data-id="${c.id}">📨 Share invite</button>
+             <button class="mini" data-act="accept-costar" data-id="${c.id}">Accept (demo)</button>
+           </div>`
+        : `<div class="costar-actions">
+             <button class="mini danger" data-duel="${c.id}">⚔️ Canon Duel</button>
+           </div>`;
+      return `
+      <div class="costar ${pending?'pending':''}">
         <div class="av" style="${avatarStyle(c.name)}">${initial(c.name)}</div>
-        <div style="flex:1">
-          <div class="cn">${esc(c.name)} ${relPill(c.rel)}</div>
-          <div class="rel ${c.rel}" style="font-size:11px">${D.relationships[c.rel]?.verb||""}</div>
+        <div style="flex:1;min-width:0">
+          <div class="cn">${esc(c.name)} ${pending?'<span class="rel-pill" style="color:var(--faint);border-color:var(--line)">pending</span>':relPill(c.rel)}</div>
+          <div class="rel ${c.rel}" style="font-size:11px">${pending?'Invite sent — waiting for them to accept their role':(D.relationships[c.rel]?.verb||"")}</div>
+          ${actions}
         </div>
-      </div>`).join("") : `<p class="muted pad" style="font-size:14px">No co-stars yet. A solo show only goes so far — the best drama needs real people.</p>`;
+      </div>`;
+    }).join("") : `<p class="muted pad" style="font-size:14px">No co-stars yet. A solo show only goes so far — the best drama needs real people.</p>`;
 
     const relbtns = Object.entries(D.relationships).map(([k,v],i)=>`
       <button class="relbtn ${i===0?'on':''}" data-rel="${k}">${v.label}</button>`).join("");
@@ -420,11 +433,33 @@
           </div>
 
           <div class="divider"></div>
+          <button class="btn ghost" data-act="bug-bounty">🐛 Report a lore bug — earn a bounty</button>
+          <div style="height:10px"></div>
           <button class="btn ghost" data-act="install">⤓ Install LORE as an app</button>
           <div style="height:10px"></div>
           <button class="btn ghost" data-act="reset" style="color:var(--hot)">Start a new life (erase)</button>
           <div style="height:14px"></div>
           <button class="btn" data-act="close-sheet">Done</button>
+        </div>
+      </div>`;
+  }
+
+  /* ---------------- INCOMING INVITE SHEET ---------------- */
+  function inviteSheet(inv){
+    const rel = D.relationships[inv.as] || D.relationships.ally;
+    return `
+      <div class="sheet-wrap">
+        <div class="sheet" data-stop="1">
+          <div class="center">
+            <div class="kicker" style="color:var(--gold)">You've been cast 🎬</div>
+            <div class="ring" style="width:80px;height:80px;border-radius:24px;margin:16px auto 12px;${avatarStyle(inv.from)};display:flex;align-items:center;justify-content:center;font-family:'Bebas Neue';font-size:38px;color:#0a0a0f">${initial(inv.from)}</div>
+            <h2 class="title-l" style="margin:0 0 6px">${esc(inv.from)} cast you</h2>
+            <p class="muted" style="font-size:14px">as their <b style="color:${rel.color}">${esc(rel.label)}</b> in their LORE series. Accept your role to step into the story — and start your own.</p>
+          </div>
+          <div style="height:18px"></div>
+          <button class="btn gold" data-act="accept-invite">Accept my role →</button>
+          <div style="height:8px"></div>
+          <button class="btn ghost" data-act="decline-invite">Maybe later</button>
         </div>
       </div>`;
   }
@@ -441,7 +476,7 @@
   window.LORE_UI = {
     viewIntro, viewOnboardName, viewOnboardArchetype, viewOnboardWorld, viewGenerating,
     viewHome, viewFeed, viewRoom, viewCast, viewProfile, episodeCard,
-    plusSheet, settingsSheet, toast,
+    plusSheet, settingsSheet, inviteSheet, toast,
     avatarStyle, initial, esc,
   };
 })();

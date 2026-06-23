@@ -19,6 +19,8 @@
   let onbStep = null;      // 'name' | 'arch' | 'world'
   let draft = { name:"", vibe:"", archetype:null, world:null };
   let castRel = "ally";    // selected relationship in cast form
+  let incomingInvite = null;   // parsed from ?join= link
+  let pendingInviter = null;   // inviter to add after onboarding
 
   /* ---------------- render ---------------- */
   function render(){
@@ -64,6 +66,10 @@
     st.archetype = draft.archetype; st.world = draft.world;
     st.worldName = world ? world.name : "";
     st.onboarded = true;
+    if(pendingInviter){
+      S.addCostar(pendingInviter.from, pendingInviter.as, "active");
+      S.unlock("caster"); pendingInviter=null;
+    }
     st.activeEp = E.generateEpisode(st);   // the pilot
     S.touchDay(); S.save();
   }
@@ -155,16 +161,72 @@
     }
   }
 
-  /* ---------------- co-stars ---------------- */
+  /* ---------------- co-stars / invites ---------------- */
   function addCostar(){
     const inp = document.getElementById("costarName");
     const name = (inp?.value||"").trim();
-    if(!name){ UI.toast("Give your co-star a name first."); inp?.focus(); return; }
-    S.addCostar(name, castRel);
+    if(!name){ sfx("error"); UI.toast("Give your co-star a name first."); inp?.focus(); return; }
+    const rel = castRel;
+    const c = S.addCostar(name, rel, "pending");   // pending until they accept (double opt-in)
     castRel = "ally";
-    UI.toast(`<span class="tt">${UI.esc(name)} cast</span> as your ${UI.esc(D.relationships[castRel]?.label||"")} — invite sent.`);
-    checkAchievements(null, null);
+    sfx("pick");
     render();
+    UI.toast(`<span class="tt">${UI.esc(name)} cast</span> as your ${UI.esc(D.relationships[rel]?.label||"")} — now send the invite.`);
+    setTimeout(()=>shareInvite(c.id), 400);
+  }
+
+  function inviteUrl(c, fromName, rel){
+    const base = location.origin + location.pathname;
+    const q = `?join=${encodeURIComponent(c.code)}&from=${encodeURIComponent(fromName)}&as=${encodeURIComponent(rel)}&name=${encodeURIComponent(c.name)}`;
+    return base + q;
+  }
+  async function shareInvite(id){
+    const st=S.state; const c=st.cast.find(x=>x.id===id); if(!c) return;
+    const url=inviteUrl(c, st.name||"A friend", c.rel);
+    const text=`I cast you as my ${D.relationships[c.rel]?.label||"co-star"} in my LORE series 🎬 Accept your role:`;
+    sfx("whoosh");
+    try{
+      if(navigator.share){ await navigator.share({title:"LORE", text, url}); UI.toast(`<span class="tt">Invite sent</span> · they accept their role, then they're in`); return; }
+    }catch(e){ if(e&&e.name==="AbortError") return; }
+    try{ await navigator.clipboard.writeText(url); UI.toast(`<span class="tt">Invite link copied</span> · send it to ${UI.esc(c.name)}`); }
+    catch(e){ UI.toast(`Invite link: ${UI.esc(url)}`); }
+  }
+  function acceptCostar(id){
+    const c=S.acceptCostar(id); if(!c) return;
+    sfx("fans"); S.unlock("caster"); render();
+    UI.toast(`<span class="tt">${UI.esc(c.name)} joined the cast</span> · they're in your story now`);
+    checkAchievements(null,null);
+  }
+
+  /* ---------------- Canon Duel ---------------- */
+  function startDuel(id){
+    const st=S.state; const c=st.cast.find(x=>x.id===id); if(!c) return;
+    if(c.status==="pending"){ sfx("error"); UI.toast("They have to accept their role before you can duel."); return; }
+    if(!confirm(`Take your dispute with ${c.name} to the room? They vote who's canon. Win or lose, it sticks.`)) return;
+    const res=E.resolveDuel(st, c);
+    const score=E.scoreEpisode(st,{eff:{fans: res.won?1.7:1.0}});
+    const fanDelta = res.won ? score.newFans : -Math.round(score.newFans*0.4);
+    st.fans=Math.max(0, st.fans+fanDelta); st.views+=score.views; st.likes+=score.likes;
+    const ep=res.ep; ep.views=score.views; ep.likes=score.likes; ep.newFans=fanDelta;
+    ep.comments=E.genFanComments(st, ep, score);
+    st.episodes.push(ep); if(res.won) S.unlock("canonduel");
+    S.touchDay(); S.save();
+    sfx(res.won?"level":"error");
+    route="home"; render();
+    setTimeout(()=>{ const el=document.getElementById("ep-"+ep.num); if(el) el.scrollIntoView({behavior:"smooth",block:"center"}); }, 100);
+    UI.toast(res.won
+      ? `<span class="tt">⚔️ You won the duel ${res.yourPct}–${res.theirPct}</span> · your version is canon now`
+      : `<span class="tt">⚔️ You lost ${res.theirPct}–${res.yourPct}</span> · ${UI.esc(res.costarName)} wrote the record`);
+    checkAchievements(null, score);
+  }
+
+  /* ---------------- Lore Bug Bounty ---------------- */
+  function bugBounty(){
+    const st=S.state; const b=E.reportBug(st);
+    st.fans+=b.bounty; S.unlock("bughunter"); S.save();
+    sfx("achieve"); closeSheet(); render();
+    UI.toast(`<span class="tt">🐛 Bounty +${S.fmt(b.bounty)}</span> ${UI.esc(b.txt)}`);
+    checkAchievements(null,null);
   }
 
   /* ---------------- event delegation ---------------- */
@@ -198,6 +260,9 @@
     const retconBtn = e.target.closest("[data-retcon]");
     if(retconBtn){ doRetcon(parseInt(retconBtn.dataset.retcon,10)); return; }
 
+    const duelBtn = e.target.closest("[data-duel]");
+    if(duelBtn){ startDuel(duelBtn.dataset.duel); return; }
+
     const tab = e.target.closest(".tab");
     if(tab){ sfx("tap"); route = tab.dataset.view; render(); return; }
 
@@ -215,11 +280,27 @@
       else if(a==="world-next"){ if(!draft.world) return; generatingThenHome(); }
       else if(a==="next-ep"){ shootNext(); }
       else if(a==="add-costar"){ addCostar(); }
+      else if(a==="share-invite"){ shareInvite(act.dataset.id); }
+      else if(a==="accept-costar"){ acceptCostar(act.dataset.id); }
+      else if(a==="bug-bounty"){ bugBounty(); }
       else if(a==="go-home"){ route="home"; render(); }
       else if(a==="open-plus"){ sfx("pick"); screen.insertAdjacentHTML("beforeend", UI.plusSheet()); }
       else if(a==="buy-plus"){ S.state.plus=true; S.save(); closeSheet(); render(); sfx("achieve"); UI.toast(`<span class="tt">LORE+ active</span> · welcome to the spotlight`); }
       else if(a==="open-settings"){ sfx("pick"); screen.insertAdjacentHTML("beforeend", UI.settingsSheet()); }
       else if(a==="close-sheet"){ sfx("tap"); closeSheet(); }
+      else if(a==="accept-invite"){
+        sfx("fans"); const inv=incomingInvite; incomingInvite=null; closeSheet();
+        if(S.state.onboarded){
+          S.addCostar(inv.from, inv.as, "active"); S.unlock("caster");
+          route="cast"; render();
+          UI.toast(`<span class="tt">You're in ${UI.esc(inv.from)}'s story</span> · and they're in yours`);
+          checkAchievements(null,null);
+        } else {
+          pendingInviter=inv; onbStep="name"; render();
+          UI.toast(`<span class="tt">First, create your character →</span>`);
+        }
+      }
+      else if(a==="decline-invite"){ sfx("tap"); incomingInvite=null; closeSheet(); }
       else if(a==="toggle-sound"){ const on=!(window.LORE_AUDIO&&window.LORE_AUDIO.isOn()); window.LORE_AUDIO&&window.LORE_AUDIO.setOn(on); act.classList.toggle("on",on); }
       else if(a==="save-key"){
         const v=document.getElementById("aiKey").value.trim();
@@ -306,19 +387,36 @@
   // capture PWA install prompt
   window.addEventListener("beforeinstallprompt",(e)=>{ e.preventDefault(); installPrompt=e; });
 
+  function parseInvite(){
+    try{
+      const p=new URLSearchParams(location.search);
+      if(p.get("join")){
+        const inv={ code:p.get("join"), from:(p.get("from")||"A friend").slice(0,18),
+                    as:p.get("as")||"ally", name:(p.get("name")||"").slice(0,18) };
+        history.replaceState(null,"",location.pathname);   // clean the URL
+        return inv;
+      }
+    }catch(e){}
+    return null;
+  }
+
   /* ---------------- boot ---------------- */
   function boot(){
     const st = S.state;
+    incomingInvite = parseInvite();
     if(st.onboarded){
       S.touchDay();
       const missed = E.runWhileAway(st);
       S.save();
       render();
-      if(missed && missed.hrs>0.02){
+      if(missed && missed.hrs>0.02 && !incomingInvite){
         setTimeout(()=>UI.toast(`<span class="tt">While you were gone —</span> ${UI.esc(missed.missed)} (+${S.fmt(missed.drift)} fans)`), 700);
       }
     } else {
       render();
+    }
+    if(incomingInvite){
+      setTimeout(()=>screen.insertAdjacentHTML("beforeend", UI.inviteSheet(incomingInvite)), 350);
     }
   }
   boot();

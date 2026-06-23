@@ -18,10 +18,13 @@
   }
   const grad = (c)=>`linear-gradient(155deg, ${c[0]}, ${c[1]})`;
 
+  const accepted = (state)=> (state.cast||[]).filter(c=>c.status!=="pending");
+
   // pick a co-star to feature, biased toward unresolved tension
   function featuredCostar(state){
-    if(!state.cast.length) return null;
-    const weighted = state.cast.flatMap(c=>{
+    const cast = accepted(state);
+    if(!cast.length) return null;
+    const weighted = cast.flatMap(c=>{
       const w = 1 + (c.rel==="rival"?2:0) + (c.rel==="love"?2:0) + (c.rel==="secret"?1:0);
       return Array(w).fill(c);
     });
@@ -50,7 +53,8 @@
     };
 
     // two co-stars for romance-style choice sets
-    const loveCandidates = state.cast.length>=2 ? state.cast : state.cast.concat(
+    const acc = accepted(state);
+    const loveCandidates = acc.length>=2 ? acc : acc.concat(
       [{name: rnd(D.seedNames)},{name: rnd(D.seedNames)}]);
     ctx.a = loveCandidates[0] ? loveCandidates[0].name : rnd(D.seedNames);
     ctx.b = loveCandidates[1] ? loveCandidates[1].name : rnd(D.seedNames);
@@ -69,7 +73,7 @@
 
     // choose a choice set; prefer romance set only if we have love-able cast
     let setPool = D.choiceSets.slice();
-    if(state.cast.filter(c=>["love"].includes(c.rel)).length < 1){
+    if(acc.filter(c=>["love"].includes(c.rel)).length < 1){
       setPool = setPool.filter((_,i)=>i!==1); // drop the explicit "Choose {a}/{b}"
     }
     const set = rnd(setPool);
@@ -135,6 +139,52 @@
       choices:[], coName: costar.name, chosen:"Rewrote the past",
       ts: Date.now(),
     };
+  }
+
+  /* ---- CANON DUEL: contested event, the room votes a winner ---- */
+  function resolveDuel(state, costar){
+    const arch  = D.archetypes.find(a=>a.id===state.archetype) || D.archetypes[0];
+    const world = D.worlds.find(w=>w.id===state.world) || D.worlds[0];
+    const claim = rnd(D.duelClaims);
+    const fill = (t)=> t.replace(/\{you\}/g, state.name||"You").replace(/\{co\}/g, costar.name);
+
+    // your sway grows with status; clamp into a believable 35–80% band, + luck
+    const tier = tierForFans(state.fans).id;          // 0..4
+    let yourPct = 42 + tier*6 + (Math.random()*24 - 10);
+    yourPct = Math.max(28, Math.min(86, Math.round(yourPct)));
+    const won = yourPct >= 50;
+
+    const epNum = (state.episodes?.length||0)+1;
+    const season = Math.floor((epNum-1)/6)+1;
+    const title = won ? "CANON DUEL: You Won" : "CANON DUEL: You Lost";
+    const verdict = won
+      ? `The room sided with you. Official record on "${claim.topic}": ${fill(claim.a)}`
+      : `The room sided with ${costar.name}. Official record on "${claim.topic}": ${fill(claim.b)}`;
+    const palette = won ? [arch.g[0], "#0d2a1a", "#19e6c1"] : [arch.g[0], "#2a0d12", "#ff6b3d"];
+    const art = window.LORE_ART ? window.LORE_ART.forEpisode({title, world:world.id, palette}) : grad(arch.g);
+
+    // relationship sours either way
+    if(won){ costar.heat=(costar.heat||0)+2; if(costar.rel==="ally") costar.rel="rival"; }
+    else { costar.heat=(costar.heat||0)+1; }
+
+    const ep = {
+      num:epNum, season, epInSeason:((epNum-1)%6)+1, isDuel:true, won,
+      title, badge:`S${season} · DUEL`, world:world.name, worldId:world.id,
+      palette, grad:grad(arch.g), art,
+      scenes:[ {t:`<span class="nm">${state.name}</span> and <span class="nm">${costar.name}</span> told two different stories about ${claim.topic}. So the room voted.`, cls:""},
+               {t:verdict, cls:"dir"} ],
+      cliff: won ? `${costar.name} is fuming. A rematch is coming.` : `You got out-canoned. Everyone saw it.`,
+      choices:[], coName:costar.name, chosen:(won?"Won the duel":"Lost the duel"),
+      ts:Date.now(),
+    };
+    return { ep, won, yourPct, theirPct:100-yourPct, costarName:costar.name };
+  }
+
+  /* ---- LORE BUG BOUNTY: surface a funny showrunner slip ---- */
+  function reportBug(state){
+    const txt = rnd(D.loreBugs).replace(/\{you\}/g, state.name||"You");
+    const bounty = 30 + rint(0, 80);
+    return { txt, bounty };
   }
 
   /* ---- generate fan reactions for a played episode ---- */
@@ -215,7 +265,8 @@
     // accrue passive fans + a "what you missed" headline
     const drift = Math.round(state.fans * Math.min(hrs,18) * 0.012);
     state.fans += drift;
-    const co = state.cast.length ? rnd(state.cast) : null;
+    const acc = accepted(state);
+    const co = acc.length ? rnd(acc) : null;
     const missed = co
       ? rnd([
           `While you were gone, ${co.name} made a move. The fans are losing it.`,
@@ -262,6 +313,6 @@
   window.LORE_ENGINE = {
     generateEpisode, applyChoice, scoreEpisode, runWhileAway,
     buildFeed, tierForFans, nextTier, grad, rnd, rint,
-    genFanComments, writersToday, generateRetcon
+    genFanComments, writersToday, generateRetcon, resolveDuel, reportBug
   };
 })();

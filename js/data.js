@@ -53,6 +53,9 @@ window.LORE_DATA = {
     { id:"legend",    icon:"👑", t:"Legend of the Season",d:"You climbed past 7,000 fans." },
     { id:"canon",     icon:"🏛️", t:"Written into Canon",  d:"You are now permanent LORE." },
     { id:"retconwar", icon:"↺",  t:"Retcon War",          d:"You rewrote the past. History is yours now." },
+    { id:"canonduel", icon:"⚔️", t:"Canon Duel",          d:"You took a story dispute to the room — and won." },
+    { id:"bughunter", icon:"🐛", t:"Lore Bug Bounty",     d:"You caught the showrunner slipping. Iconic." },
+    { id:"caster",    icon:"📨", t:"Casting Director",     d:"A friend accepted their role in your series." },
   ],
 
   // RETCON WAR — rewrite the past, flip a co-star into the villain
@@ -179,4 +182,23 @@ window.LORE_DATA = {
   ],
 
   finaleTitles: ["SEASON FINALE: Everything Burns","SEASON FINALE: The Last Crown","SEASON FINALE: No One Walks Away","SEASON FINALE: The Truth, Finally"],
+
+  // CANON DUEL — two contradicting versions of the same event; the room decides
+  duelClaims: [
+    { topic:"the breakup",   a:"{you} ended it. Clean.",            b:"{co} walked first and never looked back." },
+    { topic:"the party",     a:"{you} was never even there.",       b:"{you} started the whole thing." },
+    { topic:"the secret",    a:"{co} told everyone.",               b:"{you} kept it. {co} is lying." },
+    { topic:"the win",       a:"{you} earned it fair.",             b:"{you} only won because {co} let it slide." },
+    { topic:"the betrayal",  a:"{co} sold {you} out.",              b:"{you} did it first." },
+  ],
+
+  // LORE BUG BOUNTY — the showrunner's funniest continuity slips
+  loreBugs: [
+    "The showrunner brought back a character it killed off two episodes ago. No explanation.",
+    "{you} was in two places in the same scene. The fans noticed before you did.",
+    "An ally suddenly had a twin nobody mentioned. Classic.",
+    "A 'permanent' tattoo vanished by the next episode.",
+    "The showrunner forgot whose birthday party it was — and made it {you}'s twice.",
+    "Someone's name changed spelling mid-episode. The receipts are everywhere.",
+  ],
 };

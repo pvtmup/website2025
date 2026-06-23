@@ -36,12 +36,22 @@
   }
   function reset(){ state = fresh(); save(); }
 
-  function addCostar(name, rel){
+  function addCostar(name, rel, status){
     const id = "c"+Date.now()+Math.floor(Math.random()*99);
-    state.cast.push({ id, name:name.trim().slice(0,18)||"Guest", rel:rel||"ally", heat:0 });
+    const code = Math.random().toString(36).slice(2,8).toUpperCase();
+    const c = { id, code, name:name.trim().slice(0,18)||"Guest", rel:rel||"ally", heat:0,
+                status: status || "pending" };
+    state.cast.push(c);
     save();
-    return id;
+    return c;
   }
+  function acceptCostar(id){
+    const c = state.cast.find(x=>x.id===id);
+    if(c){ c.status="active"; save(); }
+    return c;
+  }
+  // accepted co-stars (treat legacy entries without status as active)
+  function activeCast(){ return state.cast.filter(c=>c.status!=="pending"); }
 
   function unlock(id){
     if(state.achievements.includes(id)) return false;
@@ -69,6 +79,6 @@
 
   window.LORE_STORE = {
     get state(){ return state; },
-    save, reset, addCostar, unlock, touchDay, fmt,
+    save, reset, addCostar, acceptCostar, activeCast, unlock, touchDay, fmt,
   };
 })();
