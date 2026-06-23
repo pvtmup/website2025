@@ -6,12 +6,12 @@
 window.LORE_DATA = {
 
   archetypes: [
-    { id:"star",     emoji:"🌟", name:"The Star",     desc:"Born for the spotlight. Adored, envied, watched.",      g:["#ff9d3d","#ff2e74"] },
-    { id:"rebel",    emoji:"🔥", name:"The Rebel",    desc:"Breaks the rules everyone else obeys.",                g:["#ff4d6d","#7c5cff"] },
-    { id:"mystery",  emoji:"🌙", name:"The Mystery",  desc:"Nobody knows your real story. Yet.",                   g:["#5c5cff","#11d6c2"] },
-    { id:"lover",    emoji:"💗", name:"The Heart",    desc:"Every season turns on who you choose.",                g:["#ff7eb6","#b14bff"] },
-    { id:"trickster",emoji:"🎭", name:"The Trickster",desc:"Chaos follows you and the fans love it.",               g:["#19e6c1","#7c5cff"] },
-    { id:"underdog", emoji:"⚡", name:"The Underdog", desc:"Counted out. About to flip the whole world.",          g:["#ffd66b","#ff6b3d"] },
+    { id:"star",     emoji:"🌟", name:"The Star",     desc:"Born for the spotlight. Adored, envied, watched.",      g:["#ff9d3d","#7a1538"], accent:"#ffd66b" },
+    { id:"rebel",    emoji:"🔥", name:"The Rebel",    desc:"Breaks the rules everyone else obeys.",                g:["#ff4d6d","#2a1147"], accent:"#ff6b3d" },
+    { id:"mystery",  emoji:"🌙", name:"The Mystery",  desc:"Nobody knows your real story. Yet.",                   g:["#243b8f","#06121f"], accent:"#5cd6ff" },
+    { id:"lover",    emoji:"💗", name:"The Heart",    desc:"Every season turns on who you choose.",                g:["#ff7eb6","#3a1255"], accent:"#ff9ed1" },
+    { id:"trickster",emoji:"🎭", name:"The Trickster",desc:"Chaos follows you and the fans love it.",               g:["#19c0a8","#241050"], accent:"#19e6c1" },
+    { id:"underdog", emoji:"⚡", name:"The Underdog", desc:"Counted out. About to flip the whole world.",          g:["#ffd66b","#5e2a0e"], accent:"#ffb43d" },
   ],
 
   worlds: [
@@ -130,4 +130,37 @@ window.LORE_DATA = {
   feedTitles: ["The Last Confession","Betrayed at the Gala","She Chose Wrong","The Heist Goes Live",
                "Crowned and Hunted","The Kiss That Ended a Season","Caught on Camera","The Double Cross",
                "Midnight Coup","The Secret Twin","Burned Every Bridge","Trending by Accident"],
+
+  // fan comments shown under played episodes (social proof + dopamine)
+  fanNames: ["@stan_no1","@plottwist","@cryingrn","@team_{you}","@notyourbabe","@lorehead","@s1ep7",
+             "@midnight.cut","@unaliveme","@shipper.exe","@certified.fan","@4amthoughts","@itsgiving",
+             "@maincharacter","@thatwaswild","@rewatching","@sobbing","@chronically.online"],
+  fanComments: {
+    hype:  ["NObody is doing it like {you} 😭🔥","screaming this episode ate","{you} the blueprint fr","ok MAIN CHARACTER energy 💅","this is so cinematic i cant","{you} said let me end them ✋"],
+    ship:  ["{you} x {co} or i riot 😩","the TENSION between {you} and {co} hello??","i ship it im sorry","{co} look at {you} ONE more time challenge","they're literally endgame stop"],
+    shock: ["NO BECAUSE THE CLIFFHANGER 😱","i gasped on the train","not me yelling at my phone","WHO let this happen","plot armor who? {you} in DANGER"],
+    villain:["{you} the villain we deserve 😈","not {you} being iconic AND evil","ok but he's right tho","villain arc of the season fr","i fear {you} but i respect it"],
+  },
+
+  // Writers' Room — daily plot-twist polls (the retention loop)
+  writersPrompts: [
+    { setup:"The showrunner is deciding next season's first twist. Cast your vote.",
+      options:[ {t:"A new rival arrives from {you}'s past", eff:1.0},
+                {t:"{you}'s secret finally goes public",   eff:1.3},
+                {t:"A love triangle nobody saw coming",    eff:1.1} ] },
+    { setup:"The fans want a finale moment. What ends the season?",
+      options:[ {t:"A wedding that gets interrupted",      eff:1.2},
+                {t:"A betrayal at the very last second",   eff:1.4},
+                {t:"{you} walks away from it all",          eff:1.0} ] },
+    { setup:"Pick the genre the world leans into next.",
+      options:[ {t:"Heist thriller",  eff:1.1},
+                {t:"Forbidden romance",eff:1.2},
+                {t:"Murder mystery",   eff:1.3} ] },
+    { setup:"A mystery character is joining. Who are they to {you}?",
+      options:[ {t:"A long-lost sibling", eff:1.1},
+                {t:"An ex who got famous",eff:1.3},
+                {t:"A stalker with a plan",eff:1.4} ] },
+  ],
+
+  finaleTitles: ["SEASON FINALE: Everything Burns","SEASON FINALE: The Last Crown","SEASON FINALE: No One Walks Away","SEASON FINALE: The Truth, Finally"],
 };

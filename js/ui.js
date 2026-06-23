@@ -136,16 +136,30 @@
   }
 
   /* ---------------- HOME / SERIES ---------------- */
+  function fanBlock(ep){
+    if(!ep.comments || !ep.comments.length) return "";
+    const rows = ep.comments.map(c=>`
+      <div class="fc">
+        <div class="fc-av" style="${avatarStyle(c.name)}">${initial(c.name.replace("@",""))}</div>
+        <div class="fc-body"><span class="fc-name">${esc(c.name)}</span> ${esc(c.txt)}
+          <div class="fc-likes">❤ ${fmt(c.likes)}</div></div>
+      </div>`).join("");
+    return `<div class="fans-wrap"><div class="kicker" style="color:var(--accent-2);margin-bottom:8px">Fan reactions</div>${rows}</div>`;
+  }
+
   function episodeCard(ep, played){
     const scenes = ep.scenes.map(s=>`<p class="scene ${s.cls}">${s.t}</p>`).join("");
+    const bg = ep.art || ep.grad;
     let interaction;
     if(played){
       interaction = `
         <div class="ep-stats">
           <span>👁 <b class="mono">${fmt(ep.views)}</b></span>
           <span>❤️ <b class="mono">${fmt(ep.likes)}</b></span>
-          <span style="margin-left:auto">📈 <b class="mono">+${fmt(ep.newFans||0)}</b> fans</span>
-        </div>`;
+          <span>📈 <b class="mono">+${fmt(ep.newFans||0)}</b></span>
+          <button class="share-btn" data-share="${ep.num}">⇪ Share clip</button>
+        </div>
+        ${fanBlock(ep)}`;
     } else {
       const choices = ep.choices.map((c,i)=>`
         <button class="choice" data-choice="${i}">
@@ -157,8 +171,10 @@
         <div class="choices">${choices}</div>`;
     }
     return `
-      <article class="ep" id="ep-${ep.num}">
-        <div class="ep-poster" style="background:${ep.grad}">
+      <article class="ep ${ep.isFinale?'finale':''}" id="ep-${ep.num}">
+        <div class="ep-poster" style="background:${bg}">
+          ${ep.isFinale?'<span class="finale-tag">SEASON FINALE</span>':''}
+          ${ep._ai?'<span class="ai-tag">✨ LIVE AI</span>':''}
           <span class="ep-badge">${esc(ep.badge)} · ${esc(ep.world)}</span>
           <h2 class="ep-title">${esc(ep.title)}</h2>
           <div class="ep-sub">Directed by the LORE Showrunner${ep.coName? " · feat. "+esc(ep.coName):""}</div>
@@ -197,7 +213,7 @@
   /* ---------------- TRENDING ---------------- */
   function viewFeed(){
     const items = E.buildFeed(S.state).map(it=>`
-      <div class="clip" style="background:${it.grad}" ${it.mine?'data-act="go-home"':''}>
+      <div class="clip" style="background:${it.art||it.grad}" ${it.mine?'data-act="go-home"':''}>
         ${it.mine?'<span class="mine">YOUR CLIP</span>':''}
         <div class="who">${esc(it.who)}</div>
         <div class="ct">${esc(it.title)}</div>
@@ -245,6 +261,46 @@
           <button class="btn" data-act="add-costar">+ Cast & send invite</button>
         </div>
         <p class="foot">In the full app this sends a real invite — your friend approves their character before they appear. Double opt-in, no deepfakes.</p>
+      </div>`;
+  }
+
+  /* ---------------- WRITERS' ROOM ---------------- */
+  function viewRoom(){
+    const st = S.state;
+    const wt = E.writersToday(st);
+    const voted = st.writersDay===wt.day;
+    const myIdx = st.writersChoice;
+    const total = wt.options.reduce((s,o)=>s+o.votes,0) + (voted?1:0);
+
+    const opts = wt.options.map((o,i)=>{
+      if(voted){
+        const votes = o.votes + (myIdx===i?1:0);
+        const pct = Math.round(votes/total*100);
+        const mine = myIdx===i;
+        return `<div class="poll ${mine?'mine':''}">
+          <div class="poll-fill" style="width:${pct}%"></div>
+          <div class="poll-row"><span>${esc(o.t)} ${mine?'<b>· your vote</b>':''}</span><span class="mono">${pct}%</span></div>
+        </div>`;
+      }
+      return `<button class="poll vote" data-vote="${i}"><div class="poll-row"><span>${esc(o.t)}</span><span>›</span></div></button>`;
+    }).join("");
+
+    const friends = st.cast.slice(0,3).map(c=>c.name).join(", ");
+    return `
+      <div class="view">
+        ${topbar()}
+        <div class="pad">
+          <div class="kicker" style="color:var(--gold)">Writers' Room · today</div>
+          <h1 class="title-l" style="margin:8px 0 4px">Shape what<br>happens next</h1>
+          <p class="muted" style="font-size:14px">${esc(wt.setup)}</p>
+        </div>
+        <div class="polls">${opts}</div>
+        <div class="pad">
+          ${voted
+            ? `<div class="card center" style="margin:6px 0 0"><b style="color:var(--accent-2)">Vote locked in 🔒</b><br><span class="muted" style="font-size:13px">The showrunner writes the winner into everyone's next season. Come back tomorrow for a new vote.</span></div>`
+            : `<p class="muted" style="font-size:13px">${friends?`${esc(friends)} and `:""}${E.rint(2,40)}k creators are voting right now. Pick before the room closes.</p>`}
+        </div>
+        <p class="foot">Daily collective storytelling. The crowd writes the canon — together.</p>
       </div>`;
   }
 
@@ -296,12 +352,11 @@
         <div class="divider"></div>
         <div class="pad">
           ${st.plus
-            ? `<div class="card center" style="margin:0"><b style="color:var(--gold)">LORE+ active</b><br><span class="muted" style="font-size:13px">Unlimited episodes · 4K renders · priority showrunner</span></div>`
-            : `<button class="btn gold" data-act="open-plus">★ Upgrade to LORE+</button>`}
-          <div style="height:10px"></div>
-          <button class="btn ghost" data-act="reset">Start a new life</button>
+            ? `<div class="card center" style="margin:0 0 10px"><b style="color:var(--gold)">★ LORE+ active</b><br><span class="muted" style="font-size:13px">Unlimited episodes · cinematic renders · priority showrunner</span></div>`
+            : `<button class="btn gold" data-act="open-plus">★ Upgrade to LORE+</button><div style="height:10px"></div>`}
+          <button class="btn ghost" data-act="open-settings">⚙ Settings & AI</button>
         </div>
-        <p class="foot">LORE · concept build · everything runs locally in your browser.</p>
+        <p class="foot">LORE · concept build · ${window.LORE_AI&&window.LORE_AI.enabled()?'✨ Live AI on':'local showrunner'} · runs in your browser.</p>
       </div>`;
   }
 
@@ -329,6 +384,46 @@
       </div>`;
   }
 
+  /* ---------------- SETTINGS SHEET ---------------- */
+  function settingsSheet(){
+    const AI = window.LORE_AI, AU = window.LORE_AUDIO;
+    const soundOn = AU ? AU.isOn() : true;
+    const aiOn = AI ? AI.isOn() : false;
+    const hasKey = AI ? AI.hasKey() : false;
+    return `
+      <div class="sheet-wrap" data-act="close-sheet">
+        <div class="sheet" data-stop="1">
+          <div class="center"><div class="kicker" style="color:var(--accent-2)">Settings</div>
+            <h2 class="title-l" style="margin:6px 0 14px">Tune your world</h2></div>
+
+          <div class="set-row">
+            <div><div class="set-t">Sound FX</div><div class="set-d">Cinematic clicks & chimes</div></div>
+            <button class="switch ${soundOn?'on':''}" data-act="toggle-sound"><span></span></button>
+          </div>
+
+          <div class="divider"></div>
+          <div class="set-t" style="margin:0 0 4px">✨ Live AI showrunner</div>
+          <div class="set-d" style="margin-bottom:10px">Add your Anthropic API key to have <b>Claude</b> write every episode live. Off = the built-in showrunner (works offline). Your key is stored only on this device.</div>
+          <input id="aiKey" class="field" type="password" placeholder="sk-ant-..." value="${hasKey?'••••••••••••':''}" autocomplete="off"/>
+          <div class="row" style="margin-top:8px;gap:8px">
+            <button class="btn ghost sm" data-act="save-key" style="flex:1">Save key</button>
+            <button class="btn ghost sm" data-act="test-key" style="flex:1">Test</button>
+          </div>
+          <div class="set-row" style="margin-top:12px">
+            <div><div class="set-t">Use Live AI</div><div class="set-d" id="aiState">${aiOn?'On':'Off'} · model ${AI?AI.model():''}</div></div>
+            <button class="switch ${aiOn?'on':''}" data-act="toggle-ai" id="aiSwitch"><span></span></button>
+          </div>
+
+          <div class="divider"></div>
+          <button class="btn ghost" data-act="install">⤓ Install LORE as an app</button>
+          <div style="height:10px"></div>
+          <button class="btn ghost" data-act="reset" style="color:var(--hot)">Start a new life (erase)</button>
+          <div style="height:14px"></div>
+          <button class="btn" data-act="close-sheet">Done</button>
+        </div>
+      </div>`;
+  }
+
   /* ---------------- toast ---------------- */
   let toastTimer;
   function toast(html){
@@ -340,7 +435,8 @@
 
   window.LORE_UI = {
     viewIntro, viewOnboardName, viewOnboardArchetype, viewOnboardWorld, viewGenerating,
-    viewHome, viewFeed, viewCast, viewProfile, episodeCard, plusSheet, toast,
+    viewHome, viewFeed, viewRoom, viewCast, viewProfile, episodeCard,
+    plusSheet, settingsSheet, toast,
     avatarStyle, initial, esc,
   };
 })();

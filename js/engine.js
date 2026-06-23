@@ -79,21 +79,69 @@
       coId: co ? co.id : null,
     }));
 
-    const title = `The ${rnd(D.titleA)} ${rnd(D.titleB)}`;
     const epNum = (state.episodes?.length || 0) + 1;
+    const epInSeason = ((epNum-1) % 6) + 1;     // 6 episodes per season
+    const season = Math.floor((epNum-1)/6) + 1;
+    const isFinale = epInSeason === 6;
+    const title = isFinale ? rnd(D.finaleTitles) : `The ${rnd(D.titleA)} ${rnd(D.titleB)}`;
+
+    const palette = [arch.g[0], arch.g[1], arch.accent || world.g[1]];
+    const art = window.LORE_ART
+      ? window.LORE_ART.forEpisode({ title, world: world.id, palette })
+      : grad(arch.g);
 
     return {
       num: epNum,
+      season, epInSeason, isFinale,
       title,
-      badge: `S1 · EP ${epNum}`,
+      badge: `S${season} · EP ${epInSeason}`,
       world: world.name,
+      worldId: world.id,
+      palette,
       grad: grad(arch.g),
+      art,
       scenes,
       cliff,
       choices,
       coName: co ? co.name : null,
       ts: Date.now(),
     };
+  }
+
+  /* ---- generate fan reactions for a played episode ---- */
+  function genFanComments(state, ep, score){
+    const co = ep.coName;
+    const pool = [];
+    const tones = ["hype","hype","shock"];
+    if(co) tones.push("ship");
+    if(ep.chosen && /betray|villain|burn/i.test(ep.chosen)) tones.push("villain");
+    if(score && score.viral) tones.push("hype","shock");
+    const n = Math.min(4, 2 + Math.floor(Math.random()*3));
+    const used = new Set();
+    for(let i=0;i<n;i++){
+      const tone = rnd(tones);
+      let txt = rnd(D.fanComments[tone] || D.fanComments.hype);
+      txt = txt.replace(/\{you\}/g, state.name||"you").replace(/\{co\}/g, co||"them");
+      let name = rnd(D.fanNames).replace(/\{you\}/g,(state.name||"you").toLowerCase().replace(/\s/g,""));
+      if(used.has(name)) name = name+rint(1,99);
+      used.add(name);
+      pool.push({ name, txt, likes: rint(2,400) });
+    }
+    return pool;
+  }
+
+  /* ---- Writers' Room: pick today's prompt + simulated tallies ---- */
+  function writersToday(state){
+    const day = new Date().toDateString();
+    const seed = (window.LORE_ART? window.LORE_ART.hashStr(day+(state.name||"")):day.length);
+    const prompt = D.writersPrompts[seed % D.writersPrompts.length];
+    const ctxName = state.name||"You";
+    const options = prompt.options.map((o,i)=>({
+      t: o.t.replace(/\{you\}/g, ctxName),
+      eff: o.eff,
+      votes: 800 + ((seed>>>(i*5)) % 9000),
+    }));
+    return { setup: prompt.setup.replace(/\{you\}/g, ctxName), options, day };
   }
 
   /* ---- score an episode's reach based on fans + choice ---- */
@@ -160,19 +208,23 @@
       items.push({
         mine:true, who:`@${(state.name||"you").toLowerCase().replace(/\s/g,"")}`,
         title: ep.title, views: ep.views||0, likes: ep.likes||0,
-        grad: ep.grad,
+        art: ep.art || grad(ep.palette||["#222","#111"]),
       });
     });
     // world clips
     const worlds = D.worlds;
     for(let i=0;i<10;i++){
       const w = rnd(worlds);
+      const title = rnd(D.feedTitles);
+      const art = window.LORE_ART
+        ? window.LORE_ART.forEpisode({ title, world:w.id, palette:[w.g[0],w.g[1],"#ff7eb6"] })
+        : grad(w.g);
       items.push({
         mine:false, who: rnd(D.feedNames),
-        title: rnd(D.feedTitles),
+        title,
         views: rint(2,900)*1000 + rint(0,999),
         likes: rint(1,300)*1000,
-        grad: grad(w.g),
+        art,
       });
     }
     return items;
@@ -180,6 +232,7 @@
 
   window.LORE_ENGINE = {
     generateEpisode, applyChoice, scoreEpisode, runWhileAway,
-    buildFeed, tierForFans, nextTier, grad, rnd, rint
+    buildFeed, tierForFans, nextTier, grad, rnd, rint,
+    genFanComments, writersToday
   };
 })();

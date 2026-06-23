@@ -15,6 +15,7 @@
     fans:0, views:0, likes:0,
     achievements:[],    // ids
     streak:1, lastDay:null,
+    writersDay:null, writersChoice:null,  // daily Writers' Room vote
     plus:false,
     lastSeen:Date.now(),
     created:Date.now(),

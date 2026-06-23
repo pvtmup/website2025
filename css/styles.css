@@ -258,3 +258,47 @@ label.lab{font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(
 
 .foot{font-size:11px;color:var(--faint);text-align:center;padding:18px 30px 8px;line-height:1.5}
 .divider{height:1px;background:var(--line);margin:18px 20px}
+
+/* ---------- episode extras: finale / ai / share / fans ---------- */
+.ep.finale{box-shadow:0 0 0 1px var(--gold),0 16px 50px rgba(255,170,60,.25)}
+.finale-tag{position:absolute;top:12px;left:12px;z-index:2;background:linear-gradient(135deg,#ffd66b,#ff9d3d);
+  color:#1a1206;font-weight:900;font-size:10px;letter-spacing:.1em;padding:5px 9px;border-radius:999px}
+.ai-tag{position:absolute;top:12px;right:12px;z-index:2;background:rgba(124,92,255,.85);color:#fff;
+  font-weight:800;font-size:10px;letter-spacing:.06em;padding:5px 9px;border-radius:999px;backdrop-filter:blur(6px)}
+.ep-stats{align-items:center}
+.share-btn{margin-left:auto;background:var(--card-2);border:1px solid var(--line);color:var(--ink);
+  font:inherit;font-weight:700;font-size:12px;padding:7px 11px;border-radius:999px;cursor:pointer;transition:.15s}
+.share-btn:active{transform:scale(.95)}
+.share-btn:hover{border-color:var(--accent)}
+
+.fans-wrap{padding:14px 18px 4px;border-top:1px solid var(--line)}
+.fc{display:flex;gap:10px;margin-bottom:11px}
+.fc-av{width:30px;height:30px;border-radius:10px;flex:none;display:flex;align-items:center;justify-content:center;
+  font-weight:800;font-size:12px;color:#0a0a0f}
+.fc-body{font-size:13px;line-height:1.45;color:#dedcf0}
+.fc-name{font-weight:700;color:#fff}
+.fc-likes{font-size:11px;color:var(--faint);margin-top:2px}
+
+/* ---------- writers' room ---------- */
+.polls{padding:8px 20px 4px;display:flex;flex-direction:column;gap:11px}
+.poll{position:relative;width:100%;text-align:left;border:1px solid var(--line);background:var(--card);
+  border-radius:16px;padding:15px 16px;font:inherit;color:var(--ink);overflow:hidden;cursor:default}
+.poll.vote{cursor:pointer;transition:.16s}
+.poll.vote:hover{border-color:var(--accent);background:var(--card-2)}
+.poll.vote:active{transform:scale(.99)}
+.poll-fill{position:absolute;inset:0 auto 0 0;background:linear-gradient(90deg,rgba(124,92,255,.32),rgba(255,214,107,.2));
+  transition:width .8s cubic-bezier(.2,.8,.2,1);z-index:0}
+.poll.mine .poll-fill{background:linear-gradient(90deg,rgba(255,214,107,.4),rgba(255,157,61,.25))}
+.poll-row{position:relative;z-index:1;display:flex;justify-content:space-between;align-items:center;gap:10px;font-size:14.5px;font-weight:600}
+.poll.mine{border-color:var(--gold)}
+.poll-row b{color:var(--gold);font-weight:800;font-size:12px}
+
+/* ---------- settings sheet ---------- */
+.set-row{display:flex;align-items:center;justify-content:space-between;gap:14px;padding:6px 0}
+.set-t{font-weight:700;font-size:15px}
+.set-d{font-size:12.5px;color:var(--muted);line-height:1.45}
+.switch{width:52px;height:30px;border-radius:999px;border:1px solid var(--line);background:var(--card-2);
+  position:relative;cursor:pointer;flex:none;transition:.2s;padding:0}
+.switch span{position:absolute;top:3px;left:3px;width:22px;height:22px;border-radius:50%;background:#888;transition:.2s}
+.switch.on{background:linear-gradient(135deg,var(--accent),#b14bff);border-color:transparent}
+.switch.on span{left:25px;background:#fff}
