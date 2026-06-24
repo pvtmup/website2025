@@ -130,24 +130,6 @@
       ctx.fillStyle = "rgba(0,0,0,.16)"; ctx.fillRect(x,y+h-3,w,3);
     }
 
-    function drawMascot(cx, topY){
-      const r = Math.max(7, blockH*0.32);
-      const hy = topY - r - 1;
-      // хвостик (ponytail) за головой
-      ctx.fillStyle = "#7c5cff";
-      ctx.beginPath();
-      ctx.moveTo(cx - r*0.5, hy - r*0.2);
-      ctx.quadraticCurveTo(cx - r*2.1, hy - r*1.5, cx - r*1.2, hy + r*1.0);
-      ctx.quadraticCurveTo(cx - r*1.0, hy + r*0.1, cx - r*0.5, hy - r*0.2);
-      ctx.fill();
-      ctx.fillStyle = "#ffd6a8"; // лицо
-      ctx.beginPath(); ctx.arc(cx, hy, r, 0, Math.PI*2); ctx.fill();
-      ctx.fillStyle = "#4a2f6e"; // волосы шапочкой
-      ctx.beginPath(); ctx.arc(cx, hy, r, Math.PI*1.02, Math.PI*1.98); ctx.fill();
-      ctx.fillStyle = "#2a2036"; // глаза
-      const ex=r*0.42, es=Math.max(1.4, r*0.16);
-      ctx.beginPath(); ctx.arc(cx-ex, hy+r*0.08, es, 0, Math.PI*2); ctx.arc(cx+ex*0.25, hy+r*0.08, es, 0, Math.PI*2); ctx.fill();
-    }
     function draw(){
       const skin = getSkin();
       // живой фон: оттенок дрейфует по мере подъёма, база — от сезона
@@ -177,7 +159,6 @@
         block(cur.x, baseY, cur.w, blockH-2, SKINS.colorFor(skin, cur.ci), cur.gold);
         if(cur.fast){ ctx.fillStyle="#19e6c1"; ctx.fillRect(cur.x, baseY, cur.w, 4);
           ctx.fillRect(cur.x, baseY+blockH-6, cur.w, 4); }
-        drawMascot(cur.x + cur.w/2, baseY);  // маскот с хвостиком едет на блоке
       }
       // particles
       parts.forEach(p=>{ ctx.globalAlpha=Math.max(0,p.life); ctx.fillStyle=p.color; ctx.fillRect(p.x-3,p.y-3,6,6); });
