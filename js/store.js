@@ -37,11 +37,11 @@
   }
   function reset(){ state = fresh(); save(); }
 
-  function addCostar(name, rel, status){
+  function addCostar(name, rel, status, demo){
     const id = "c"+Date.now()+Math.floor(Math.random()*99);
     const code = Math.random().toString(36).slice(2,8).toUpperCase();
-    const c = { id, code, name:name.trim().slice(0,18)||"Guest", rel:rel||"ally", heat:0,
-                status: status || "pending" };
+    const c = { id, code, name:name.trim().slice(0,18)||"Гость", rel:rel||"ally", heat:0,
+                status: status || "pending", demo: !!demo };
     state.cast.push(c);
     save();
     return c;

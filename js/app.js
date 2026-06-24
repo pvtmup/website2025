@@ -17,7 +17,7 @@
   // transient UI state
   let route = "home";      // active main tab
   let onbStep = null;      // 'name' | 'arch' | 'world'
-  let draft = { name:"", vibe:"", archetype:null, world:null };
+  let draft = { name:"", vibe:"", archetype:null, world:null, cast:[] };
   let castRel = "ally";    // selected relationship in cast form
   let incomingInvite = null;   // parsed from ?join= link
   let pendingInviter = null;   // inviter to add after onboarding
@@ -32,6 +32,7 @@
       else if(onbStep==="name"){ screen.innerHTML = UI.viewOnboardName(); }
       else if(onbStep==="arch"){ screen.innerHTML = UI.viewOnboardArchetype(); restorePicks(); }
       else if(onbStep==="world"){ screen.innerHTML = UI.viewOnboardWorld(); restorePicks(); }
+      else if(onbStep==="cast"){ screen.innerHTML = UI.viewOnboardCast(draft.cast); }
       return;
     }
     tabbar.classList.remove("hidden");
@@ -68,10 +69,22 @@
     st.archetype = draft.archetype; st.world = draft.world;
     st.worldName = world ? world.name : "";
     st.onboarded = true;
+
+    // seed the cast from onboarding (demo stand-ins); auto-add a couple if empty
+    const rels = ["love","rival","secret","ally"];
+    let names = draft.cast.map(c=>c.name);
+    if(!names.length){
+      const pool = D.seedNames.slice();
+      names = [ pool.splice(Math.floor(Math.random()*pool.length),1)[0],
+                pool.splice(Math.floor(Math.random()*pool.length),1)[0] ];
+    }
+    names.forEach((n,i)=> S.addCostar(n, rels[i%rels.length], "active", true));
+
     if(pendingInviter){
       S.addCostar(pendingInviter.from, pendingInviter.as, "active");
       S.unlock("caster"); pendingInviter=null;
     }
+    if(S.state.cast.length) S.unlock("costar");
     st.activeEp = E.generateEpisode(st);   // the pilot
     S.touchDay(); S.save();
   }
@@ -297,6 +310,16 @@
       return;
     }
 
+    const castAdd = e.target.closest("[data-castadd]");
+    if(castAdd){
+      const n=castAdd.dataset.castadd;
+      const i=draft.cast.findIndex(c=>c.name===n);
+      if(i>=0) draft.cast.splice(i,1); else draft.cast.push({name:n});
+      sfx("pick"); render(); return;
+    }
+    const castRemove = e.target.closest("[data-castremove]");
+    if(castRemove){ draft.cast.splice(parseInt(castRemove.dataset.castremove,10),1); sfx("tap"); render(); return; }
+
     const relBtn = e.target.closest("[data-rel]");
     if(relBtn){
       castRel = relBtn.dataset.rel;
@@ -339,7 +362,14 @@
         onbStep="arch"; render();
       }
       else if(a==="arch-next"){ if(!draft.archetype) return; onbStep="world"; render(); }
-      else if(a==="world-next"){ if(!draft.world) return; generatingThenHome(); }
+      else if(a==="world-next"){ if(!draft.world) return; sfx("pick"); onbStep="cast"; render(); }
+      else if(a==="onb-add-costar"){
+        const inp=document.getElementById("castInput"); const v=(inp?.value||"").trim();
+        if(!v){ inp?.focus(); return; }
+        if(!draft.cast.some(c=>c.name.toLowerCase()===v.toLowerCase())) draft.cast.push({name:v.slice(0,18)});
+        sfx("pick"); render();
+      }
+      else if(a==="cast-done"){ generatingThenHome(); }
       else if(a==="next-ep"){ shootNext(); }
       else if(a==="crossover"){ doCrossover(); }
       else if(a==="add-costar"){ addCostar(); }
@@ -347,6 +377,7 @@
       else if(a==="accept-costar"){ acceptCostar(act.dataset.id); }
       else if(a==="bug-bounty"){ bugBounty(); }
       else if(a==="go-home"){ route="home"; render(); }
+      else if(a==="go-cast"){ sfx("tap"); route="cast"; render(); }
       else if(a==="open-plus"){ sfx("pick"); screen.insertAdjacentHTML("beforeend", UI.plusSheet()); }
       else if(a==="buy-plus"){ S.state.plus=true; S.save(); closeSheet(); render(); sfx("achieve"); UI.toast(`<span class="tt">LORE+ активен</span> · добро пожаловать под софиты`); }
       else if(a==="open-settings"){ sfx("pick"); screen.insertAdjacentHTML("beforeend", UI.settingsSheet()); }
@@ -388,7 +419,7 @@
       }
       else if(a==="reset"){
         if(confirm("Начать новую жизнь? Твой текущий сериал исчезнет навсегда.")){
-          S.reset(); closeSheet(); onbStep=null; route="home"; draft={name:"",vibe:"",archetype:null,world:null}; render();
+          S.reset(); closeSheet(); onbStep=null; route="home"; draft={name:"",vibe:"",archetype:null,world:null,cast:[]}; render();
         }
       }
       return;

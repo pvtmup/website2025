@@ -99,6 +99,34 @@
     </section>`;
   }
 
+  function viewOnboardCast(draftCast){
+    draftCast = draftCast || [];
+    const picked = new Set(draftCast.map(c=>c.name));
+    const chips = D.seedNames.slice(0,8).map(n=>`
+      <button class="castchip ${picked.has(n)?'on':''}" data-castadd="${esc(n)}">${esc(n)}</button>`).join("");
+    const list = draftCast.length ? `<div class="castlist">`+draftCast.map((c,i)=>`
+      <span class="castitem">${esc(c.name)} <b data-castremove="${i}">✕</b></span>`).join("")+`</div>` : "";
+    return `
+    <section class="view" style="padding-top:60px">
+      <div class="pad">
+        <div class="kicker">Кастинг · финал</div>
+        <h1 class="title-l" style="margin:10px 0 6px">Кто в твоём<br>касте?</h1>
+        <p class="muted" style="font-size:14px">Вся соль LORE — драма с реальными людьми. Добавь друзей (можно пока вымышленных — реальных позовёшь в один тап позже).</p>
+        <label class="lab" style="display:block;margin-top:20px">Быстрый выбор</label>
+        <div class="castchips">${chips}</div>
+        <label class="lab" style="display:block;margin-top:16px">Или впиши своё имя / @ник</label>
+        <div class="row" style="gap:8px;margin-top:8px">
+          <input id="castInput" class="field" style="margin-top:0" maxlength="18" placeholder="напр. Саша, Кристина…" autocomplete="off"/>
+          <button class="btn sm ghost" data-act="onb-add-costar" style="white-space:nowrap">Добавить</button>
+        </div>
+        ${list}
+        <div style="height:22px"></div>
+        <button class="btn gold" data-act="cast-done">${draftCast.length?`Снять пилот с кастом (${draftCast.length}) →`:"Снять пилот →"}</button>
+        <p class="foot">Без каста мы добавим пару персонажей-стендинов, чтобы пилот был с драмой. Заменишь их на реальных друзей позже.</p>
+      </div>
+    </section>`;
+  }
+
   function viewGenerating(name){
     return `
     <section class="view intro" style="justify-content:center;text-align:center;gap:0">
@@ -212,11 +240,16 @@
       body += `<h2 class="sec">Ранее в твоём сериале</h2>`;
       body += history.map(ep=>episodeCard(ep, true)).join("");
     }
+    const onlyDemo = st.cast.length && st.cast.every(c=>c.demo);
+    const nudge = onlyDemo
+      ? `<div class="nudge" data-act="go-cast"><span>📨</span><div><b>Позови реального друга в каст</b><br><span class="muted">Драма с настоящим человеком бьёт совсем иначе →</span></div></div>`
+      : "";
     return `
       <div class="view">
         ${topbar()}
         ${fansMeter()}
         <div style="height:14px"></div>
+        ${nudge}
         ${body}
         <p class="foot">Мир продолжает жить, пока тебя нет. Возвращайся — узнаешь, что изменилось.</p>
       </div>`;
@@ -255,14 +288,18 @@
              <button class="mini" data-act="accept-costar" data-id="${c.id}">Принять (демо)</button>
            </div>`
         : `<div class="costar-actions">
+             ${c.demo?`<button class="mini gold" data-act="share-invite" data-id="${c.id}">📨 Позвать по-настоящему</button>`:''}
              <button class="mini danger" data-duel="${c.id}">⚔️ Канон-дуэль</button>
            </div>`;
+      const tag = pending
+        ? '<span class="rel-pill" style="color:var(--faint);border-color:var(--line)">ждёт</span>'
+        : (c.demo?'<span class="rel-pill" style="color:var(--faint);border-color:var(--line)">демо</span> '+relPill(c.rel):relPill(c.rel));
       return `
       <div class="costar ${pending?'pending':''}">
         <div class="av" style="${avatarStyle(c.name)}">${initial(c.name)}</div>
         <div style="flex:1;min-width:0">
-          <div class="cn">${esc(c.name)} ${pending?'<span class="rel-pill" style="color:var(--faint);border-color:var(--line)">ждёт</span>':relPill(c.rel)}</div>
-          <div class="rel ${c.rel}" style="font-size:11px">${pending?'Инвайт отправлен — ждём, пока примут роль':(D.relationships[c.rel]?.verb||"")}</div>
+          <div class="cn">${esc(c.name)} ${tag}</div>
+          <div class="rel ${c.rel}" style="font-size:11px">${pending?'Инвайт отправлен — ждём, пока примут роль':(c.demo?'персонаж-стендин · позови реального друга':(D.relationships[c.rel]?.verb||""))}</div>
           ${actions}
         </div>
       </div>`;
@@ -535,7 +572,7 @@
   }
 
   window.LORE_UI = {
-    viewIntro, viewOnboardName, viewOnboardArchetype, viewOnboardWorld, viewGenerating,
+    viewIntro, viewOnboardName, viewOnboardArchetype, viewOnboardWorld, viewOnboardCast, viewGenerating,
     viewHome, viewFeed, viewDiscover, viewRoom, viewCast, viewProfile, episodeCard,
     plusSheet, settingsSheet, inviteSheet, toast,
     avatarStyle, initial, esc,
