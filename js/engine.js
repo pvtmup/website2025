@@ -13,6 +13,7 @@
       .replace(/\{you\}/g, `<span class="nm">${ctx.you}</span>`)
       .replace(/\{world2\}/g, ctx.world2 || "another world")
       .replace(/\{world\}/g, ctx.world)
+      .replace(/\{vibe\}/g, ctx.vibe || "тем самым")
       .replace(/\{host\}/g, ctx.host ? `<span class="nm">${ctx.host}</span>` : "the host")
       .replace(/\{co\}/g, ctx.co ? `<span class="nm">${ctx.co}</span>` : "someone")
       .replace(/\{a\}/g, ctx.a || "them")
@@ -61,14 +62,30 @@
     ctx.a = loveCandidates[0] ? loveCandidates[0].name : rnd(D.seedNames);
     ctx.b = loveCandidates[1] ? loveCandidates[1].name : rnd(D.seedNames);
 
+    ctx.vibe = state.vibe || "";
+
     const scenes = [];
-    // cold open by archetype
-    scenes.push({ t: fill(rnd(D.opens[arch.id]), ctx), cls:"" });
-    // a directed beat (italic stage direction flavor)
+    // cold open — personalised by "vibe" ~1/3 of the time, else archetype
+    if(ctx.vibe && D.vibeOpens && Math.random() < 0.34){
+      scenes.push({ t: fill(rnd(D.vibeOpens), ctx), cls:"" });
+    } else {
+      scenes.push({ t: fill(rnd(D.opens[arch.id]), ctx), cls:"" });
+    }
+    // a directed beat with the featured co-star (or a solo beat)
     if(co){
       scenes.push({ t: fill(rnd(D.beats[co.rel]), {...ctx, co:co.name}), cls:"" });
     } else {
       scenes.push({ t: fill(rnd(D.solo), ctx), cls:"" });
+    }
+    // sometimes a third beat for pacing (a second co-star or a solo turn)
+    if(Math.random() < 0.45){
+      const co2 = acc.filter(c=>!co || c.id!==co.id);
+      if(co2.length){
+        const c2 = rnd(co2);
+        scenes.push({ t: fill(rnd(D.beats[c2.rel]), {...ctx, co:c2.name}), cls:"" });
+      } else {
+        scenes.push({ t: fill(rnd(D.solo), ctx), cls:"dir" });
+      }
     }
 
     const cliff = fill(rnd(D.cliffs), ctx);
@@ -334,19 +351,23 @@
   /* ---- apply a choice: mutate relationships + return summary ---- */
   function applyChoice(state, choice){
     const eff = choice.eff || {};
+    let relChange = null;
     // relationship drift on the featured co-star
     if(choice.coId){
       const c = state.cast.find(x=>x.id===choice.coId);
       if(c){
+        const before = c.rel;
         ["ally","rival","love","secret"].forEach(r=>{ if(eff[r]) c.heat=(c.heat||0)+eff[r]; });
         // promote relationship if a stat got hot
         if(eff.love && (c.heat||0)>=3) c.rel="love";
         else if(eff.rival && (c.heat||0)>=3) c.rel="rival";
         else if(eff.ally) c.rel = c.rel==="rival"?c.rel:"ally";
         else if(eff.secret) c.rel = "secret";
+        if(c.rel!==before) relChange = { name:c.name, rel:c.rel, label:(D.relationships[c.rel]?.label||c.rel) };
       }
     }
     const score = scoreEpisode(state, choice);
+    score.relChange = relChange;
     state.fans   += score.newFans;
     state.views  += score.views;
     state.likes  += score.likes;

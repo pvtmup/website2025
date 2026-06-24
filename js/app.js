@@ -223,6 +223,12 @@
     // outcome toast
     UI.toast(`<span class="tt">+${S.fmt(score.newFans)} фанатов</span> · ${S.fmt(score.views)} просмотров${score.viral?' · 🚀 ВИРАЛ':''}`);
 
+    // relationship shift feedback — choices should visibly change things
+    if(score.relChange){
+      const rc=score.relChange;
+      setTimeout(()=>UI.toast(`<span class="tt">${UI.esc(rc.name)} → ${UI.esc(rc.label)}</span> отношения изменились`), 900);
+    }
+
     // tier-up celebration
     const newTier = E.tierForFans(st.fans);
     if(newTier.id>prevTier){
