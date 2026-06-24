@@ -31,7 +31,14 @@
     try{ history.replaceState(null,"",location.pathname); }catch(e){}
   }
 
-  function ensureGame(){ if(!game) game=G.create({ canvas, getSkin, audio:A, callbacks:{ onScore, onOver } }); }
+  const getBg = ()=>{ try{ return SE.current().hue; }catch(e){ return 250; } };
+  function onMilestone(score){
+    const reward = 20 + score;            // растёт с высотой
+    S.addCoins(reward); if(SE) SE.addXP(S.s, 25); S.save();
+    A.fx.win(); if(TG) TG.haptic("success");
+    UI.toast(`🏔️ Высота ${score}! <b>+${reward} 🪙</b>`);
+  }
+  function ensureGame(){ if(!game) game=G.create({ canvas, getSkin, getBg, audio:A, callbacks:{ onScore, onOver, onMilestone } }); }
 
   function onScore(score, info){
     if(info.combo>maxCombo) maxCombo=info.combo;

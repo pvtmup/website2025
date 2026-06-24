@@ -7,11 +7,12 @@
   function create(opts){
     const canvas = opts.canvas, ctx = canvas.getContext("2d");
     const getSkin = opts.getSkin || (()=>SKINS.SKINS[0]);
+    const getBg = opts.getBg || (()=>250);
     const cb = opts.callbacks || {};
     let W=0,H=0,DPR=1;
     let blockH=34, baseY=0, INIT_W=0, PERFECT=5;
     let placed=[], cur=null, slices=[], parts=[];
-    let running=false, last=0, score=0, combo=0, shake=0, rng=Math.random, raf=0;
+    let running=false, last=0, score=0, combo=0, shake=0, flash=0, rng=Math.random, raf=0;
 
     function resize(){
       const r = canvas.getBoundingClientRect();
@@ -38,7 +39,7 @@
     function start(seed){
       resize();
       rng = (seed!=null) ? RNG.mulberry32(seed>>>0) : Math.random;
-      placed = []; slices = []; parts = []; score = 0; combo = 0; shake = 0;
+      placed = []; slices = []; parts = []; score = 0; combo = 0; shake = 0; flash = 0;
       const w = INIT_W, x = (W-w)/2;
       placed.push({ x, w, ci:0 });
       spawn(w);
@@ -81,6 +82,12 @@
       placed.push({ x:nx, w:nw, ci:placed.length, gold:cur.gold && perfect });
       score++;
       cb.onScore && cb.onScore(score, { perfect, combo, bonus });
+      // майлстон высоты — каждые 25
+      if(score>0 && score%25===0){
+        flash = 1; shake = Math.max(shake, 0.3);
+        addParticles(top.x+top.w/2, baseY, "#ffd66b");
+        cb.onMilestone && cb.onMilestone(score);
+      }
       spawn(nw);
     }
 
@@ -106,6 +113,7 @@
       parts.forEach(p=>{ p.vy += 500*dt; p.x += p.vx*dt; p.y += p.vy*dt; p.life -= dt*1.6; });
       parts = parts.filter(p=>p.life>0);
       if(shake>0) shake = Math.max(0, shake - dt*1.4);
+      if(flash>0) flash = Math.max(0, flash - dt*2);
       draw();
       raf = requestAnimationFrame(loop);
     }
@@ -120,7 +128,12 @@
 
     function draw(){
       const skin = getSkin();
-      ctx.clearRect(0,0,W,H);
+      // живой фон: оттенок дрейфует по мере подъёма, база — от сезона
+      const hue = (getBg() + score*2) % 360;
+      const bg = ctx.createLinearGradient(0,0,0,H);
+      bg.addColorStop(0, `hsl(${hue} 45% 14%)`);
+      bg.addColorStop(1, `hsl(${(hue+40)%360} 55% 6%)`);
+      ctx.fillStyle = bg; ctx.fillRect(0,0,W,H);
       let ox=0, oy=0;
       if(shake>0){ ox=(Math.random()-0.5)*shake*22; oy=(Math.random()-0.5)*shake*22; }
       ctx.save(); ctx.translate(ox,oy);
@@ -143,6 +156,7 @@
       parts.forEach(p=>{ ctx.globalAlpha=Math.max(0,p.life); ctx.fillStyle=p.color; ctx.fillRect(p.x-3,p.y-3,6,6); });
       ctx.globalAlpha=1;
       ctx.restore();
+      if(flash>0){ ctx.globalAlpha=flash*0.4; ctx.fillStyle="#ffd66b"; ctx.fillRect(0,0,W,H); ctx.globalAlpha=1; }
     }
 
     return { start, stop, tap, resize, get score(){ return score; },
