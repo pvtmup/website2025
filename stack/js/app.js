@@ -26,8 +26,8 @@
       S.addCoins(150); localStorage.setItem("stack.refclaimed","1");
       setTimeout(()=>UI.toast(`<b>+150 🪙</b> бонус за приглашение`),600);
     }
-    // веб-фолбэк ?seed=&s=
-    if(!duel && p.get("seed")){ duel={ seed:(parseInt(p.get("seed"),10)>>>0), score: p.get("s")?parseInt(p.get("s"),10):null }; }
+    // веб-фолбэк ?seed=&s=&n=
+    if(!duel && p.get("seed")){ duel={ seed:(parseInt(p.get("seed"),10)>>>0), score: p.get("s")?parseInt(p.get("s"),10):null, name: p.get("n")?decodeURIComponent(p.get("n")).slice(0,18):null }; }
     try{ history.replaceState(null,"",location.pathname); }catch(e){}
   }
 
@@ -82,7 +82,8 @@
     SE.addXP(S.s, xpGain);
     S.save();
     if(best){ setTimeout(()=>A.fx.win(),300); if(TG) TG.haptic("success"); }
-    setScreen(UI.screenOver({ score, best, coins:earned, maxCombo, mode, first:(S.s.games===1), target: (mode==="duel"&&duel)?duel.score:null }));
+    setScreen(UI.screenOver({ score, best, coins:earned, maxCombo, mode, first:(S.s.games===1),
+      target: (mode==="duel"&&duel)?duel.score:null, duelName: (mode==="duel"&&duel)?duel.name:null }));
     countUp(overlay.querySelector(".over-score"), score);
     // тосты о заданиях/целях поверх
     let delay=400;
@@ -157,7 +158,7 @@
     else if(a==="open-shop") setScreen(UI.screenShop());
     else if(a==="open-board") setScreen(UI.screenBoard());
     else if(a==="invite") SH.shareInvite().then(r=>{ UI.toast("📨 "+r); viralReward(r); });
-    else if(a==="share") SH.shareResult(lastScore, curSeed, S.s.equipped).then(r=>{ UI.toast("⇪ "+r); viralReward(r); });
+    else if(a==="share") SH.shareResult(lastScore, curSeed, S.s.equipped, S.s.name).then(r=>{ UI.toast("⇪ "+r); viralReward(r); });
   });
 
   // награда за первый отправленный вызов/инвайт — буст вирального действия

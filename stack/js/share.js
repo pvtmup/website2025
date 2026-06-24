@@ -2,7 +2,9 @@
 (function(){
   const SK = window.STACK_SKINS;
   function baseUrl(){ return location.origin + location.pathname; }
-  function challengeLink(seed, score){ return baseUrl() + "?seed=" + (seed>>>0) + (score!=null?("&s="+score):""); }
+  function challengeLink(seed, score, name){
+    return baseUrl() + "?seed=" + (seed>>>0) + (score!=null?("&s="+score):"") + (name?("&n="+encodeURIComponent(name)):"");
+  }
 
   function buildCard(score, seed, equippedId){
     const W=1080,H=1920, c=document.createElement("canvas"); c.width=W;c.height=H;
@@ -31,10 +33,10 @@
     return c.toDataURL("image/png");
   }
 
-  async function shareResult(score, seed, equippedId){
+  async function shareResult(score, seed, equippedId, name){
     const TG = window.STACK_TG;
     const tgLink = TG && TG.deepLink("d"+(seed>>>0)+"s"+score);
-    const url = tgLink || challengeLink(seed, score);
+    const url = tgLink || challengeLink(seed, score, name);
     const text = `Я собрал ${score} в СТЭК 🧱 та же башня — побей меня:`;
     // внутри Telegram — нативный выбор чата
     if(TG && TG.isTG && TG.share(url, text)) return "вызов отправлен";
