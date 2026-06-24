@@ -9,6 +9,8 @@
     { id:"toxic",   name:"Кислота",cost:400, hue:i=>(90+i*7)%160,   sat:80, light:55 },
     { id:"gold",    name:"Золото", cost:800, hue:i=>(40+i*1)%50,    sat:85, light:58 },
     { id:"mono",    name:"Нуар",   cost:600, mono:true },
+    { id:"aurora",  name:"Аврора", cost:1200, season:true, hue:i=>(140+i*12)%280+40, sat:75, light:60 },
+    { id:"lava",    name:"Лава",   cost:1500, season:true, hue:i=>(i*6)%40,  sat:90, light:55 },
   ];
   function colorFor(skin, i){
     if(skin.mono){ const l = 30 + (i*4)%55; return `hsl(230 8% ${l}%)`; }

@@ -31,7 +31,8 @@
     function spawn(prevW){
       const side = rng() < 0.5 ? 0 : 1;
       const w = prevW;
-      cur = { x: side? (W-w) : 0, w, dir: side? -1: 1, ci: placed.length };
+      const gold = placed.length>0 && (placed.length % 5 === 0); // периодически — золотой бонус-блок
+      cur = { x: side? (W-w) : 0, w, dir: side? -1: 1, ci: placed.length, gold };
     }
 
     function start(seed){
@@ -61,23 +62,25 @@
       if(ov <= 0){ gameover(); return; }
       const delta = cur.x - top.x;
       const perfect = Math.abs(delta) <= PERFECT;
+      const bonus = perfect && cur.gold;
       let nx, nw;
       if(perfect){
         nx = top.x; nw = Math.min(top.w + 4, INIT_W); combo++;
-        shake = Math.min(0.35, 0.12+combo*0.02);
-        addParticles(top.x+top.w/2, baseY, SKINS.colorFor(getSkin(), placed.length));
-        AUDIO && AUDIO.fx.perfect(combo);
+        shake = Math.min(0.4, 0.12+combo*0.02) + (bonus?0.2:0);
+        const pc = bonus ? "#ffd66b" : SKINS.colorFor(getSkin(), placed.length);
+        addParticles(top.x+top.w/2, baseY, pc);
+        if(bonus){ addParticles(top.x+top.w/2, baseY, "#fff"); }
+        AUDIO && AUDIO.fx.perfect(combo); if(bonus && AUDIO) AUDIO.fx.coin();
       } else {
         combo = 0; nx = ovS; nw = ov; shake = 0.1;
-        // отрезанный кусок падает
         const cutW = cur.w - ov;
         const cutX = (cur.x < top.x) ? cur.x : ovE;
-        if(cutW>0.5) slices.push({ x:cutX, y:baseY, w:cutW, vy:0, vx:(cur.x<top.x?-40:40), a:1, ci:cur.ci });
+        if(cutW>0.5) slices.push({ x:cutX, y:baseY, w:cutW, vy:0, vx:(cur.x<top.x?-40:40), a:1, ci:cur.ci, gold:cur.gold });
         AUDIO && AUDIO.fx.slice(); AUDIO && AUDIO.fx.place(combo);
       }
-      placed.push({ x:nx, w:nw, ci:placed.length });
+      placed.push({ x:nx, w:nw, ci:placed.length, gold:cur.gold && perfect });
       score++;
-      cb.onScore && cb.onScore(score, { perfect, combo });
+      cb.onScore && cb.onScore(score, { perfect, combo, bonus });
       spawn(nw);
     }
 
@@ -107,14 +110,12 @@
       raf = requestAnimationFrame(loop);
     }
 
-    function block(x,y,w,h,color){
-      ctx.fillStyle = color;
-      ctx.fillRect(x,y,w,h);
-      // верхняя грань светлее (псевдо-3D)
-      ctx.fillStyle = "rgba(255,255,255,.14)";
-      ctx.fillRect(x,y,w,3);
-      ctx.fillStyle = "rgba(0,0,0,.16)";
-      ctx.fillRect(x,y+h-3,w,3);
+    function block(x,y,w,h,color,gold){
+      if(gold){ ctx.save(); ctx.shadowColor="#ffd66b"; ctx.shadowBlur=18; ctx.fillStyle="#ffcf4d"; ctx.fillRect(x,y,w,h); ctx.restore();
+        ctx.fillStyle="rgba(255,255,255,.35)"; ctx.fillRect(x,y,w,3); ctx.fillStyle="rgba(120,80,0,.25)"; ctx.fillRect(x,y+h-3,w,3); return; }
+      ctx.fillStyle = color; ctx.fillRect(x,y,w,h);
+      ctx.fillStyle = "rgba(255,255,255,.14)"; ctx.fillRect(x,y,w,3);
+      ctx.fillStyle = "rgba(0,0,0,.16)"; ctx.fillRect(x,y+h-3,w,3);
     }
 
     function draw(){
@@ -128,12 +129,16 @@
       for(let i=placed.length-1, row=0; i>=0 && row<visible; i--, row++){
         const b = placed[i];
         const y = baseY + blockH + row*blockH;
-        block(b.x, y, b.w, blockH-2, SKINS.colorFor(skin, b.ci));
+        block(b.x, y, b.w, blockH-2, SKINS.colorFor(skin, b.ci), b.gold);
       }
+      // призрак-ориентир: куда встанет идеальный блок
+      const top = placed[placed.length-1];
+      if(top && cur){ ctx.strokeStyle="rgba(255,255,255,.22)"; ctx.lineWidth=1; ctx.setLineDash([6,6]);
+        ctx.strokeRect(top.x, baseY, top.w, blockH-2); ctx.setLineDash([]); }
       // slices
-      slices.forEach(s=>{ ctx.globalAlpha=Math.max(0,s.a); block(s.x,s.y,s.w,blockH-2,SKINS.colorFor(skin,s.ci)); ctx.globalAlpha=1; });
+      slices.forEach(s=>{ ctx.globalAlpha=Math.max(0,s.a); block(s.x,s.y,s.w,blockH-2,SKINS.colorFor(skin,s.ci),s.gold); ctx.globalAlpha=1; });
       // current moving block
-      if(cur) block(cur.x, baseY, cur.w, blockH-2, SKINS.colorFor(skin, cur.ci));
+      if(cur) block(cur.x, baseY, cur.w, blockH-2, SKINS.colorFor(skin, cur.ci), cur.gold);
       // particles
       parts.forEach(p=>{ ctx.globalAlpha=Math.max(0,p.life); ctx.fillStyle=p.color; ctx.fillRect(p.x-3,p.y-3,6,6); });
       ctx.globalAlpha=1;

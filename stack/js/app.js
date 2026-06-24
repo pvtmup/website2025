@@ -2,7 +2,7 @@
 (function(){
   const G=window.STACK_GAME, S=window.STACK_STORE, UI=window.STACK_UI,
         SK=window.STACK_SKINS, SH=window.STACK_SHARE, RNG=window.STACK_RNG, A=window.STACK_AUDIO,
-        TG=window.STACK_TG, Q=window.STACK_QUESTS;
+        TG=window.STACK_TG, Q=window.STACK_QUESTS, SE=window.STACK_SEASON;
   const REWARD_TABLE=[20,40,60,80,100,120,150];
   function rewardFor(streak){ return REWARD_TABLE[Math.min(Math.max((streak||1)-1,0),6)]; }
   window.STACK_REWARD = rewardFor; // для UI
@@ -36,6 +36,7 @@
   function onScore(score, info){
     if(info.combo>maxCombo) maxCombo=info.combo;
     if(info.perfect) perfectCount++;
+    if(info.bonus){ S.addCoins(15); if(SE) SE.addXP(S.s,30); S.save(); if(TG) TG.haptic("success"); UI.toast("✨ Золотой блок: <b>+15 🪙</b>"); }
     if(TG) TG.haptic(info.perfect ? "rigid" : "light");
     hud.querySelector(".hud-score").textContent=score;
     const cc=hud.querySelector(".hud-combo");
@@ -67,6 +68,9 @@
     // долгосрочные цели (авто-награда)
     const freshA = Q.checkAchs(S.s);
     freshA.forEach((a,i)=>{ S.addCoins(a.reward); });
+    // XP сезона
+    const xpGain = score + perfectCount*2 + (mode==="daily"?20:0);
+    SE.addXP(S.s, xpGain);
     S.save();
     if(best){ setTimeout(()=>A.fx.win(),300); if(TG) TG.haptic("success"); }
     setScreen(UI.screenOver({ score, best, coins:earned, maxCombo, mode, target: (mode==="duel"&&duel)?duel.score:null }));
@@ -78,8 +82,27 @@
 
   function setScreen(html){ overlay.innerHTML=html; overlay.classList.remove("hidden"); }
   function home(){
-    Q.ensureDaily(S.s, UI.dailyKeyNow(), RNG.todaySeed().seed); S.save();
+    Q.ensureDaily(S.s, UI.dailyKeyNow(), RNG.todaySeed().seed);
+    SE.ensure(S.s); S.save();
     setScreen(UI.screenHome(duel));
+  }
+
+  function claimSeason(kind, i){
+    const t=SE.TRACK[i], st=S.s; SE.ensure(st);
+    if(!t || st.season.xp < t.xp) return;
+    if(kind==="prem" && !st.season.owner){ UI.toast("Нужен премиум-пасс 🎟️"); return; }
+    const arr = kind==="prem" ? st.season.prem : st.season.free;
+    if(arr.includes(i)) return;
+    const rew = kind==="prem" ? t.prem : t.free;
+    if(rew.coins) S.addCoins(rew.coins);
+    if(rew.skin) S.own(rew.skin);
+    arr.push(i); S.save(); A.fx.coin(); if(TG)TG.haptic("success");
+    setScreen(UI.screenSeason());
+    UI.toast(`Награда забрана${rew.skin?": скин "+SK.byId(rew.skin).name:" +"+rew.coins+"🪙"}`);
+  }
+  function buyPass(){
+    if(S.s.coins>=SE.PASS_COST){ S.addCoins(-SE.PASS_COST); SE.ensure(S.s); S.s.season.owner=true; S.save(); A.fx.coin(); if(TG)TG.haptic("success"); setScreen(UI.screenSeason()); UI.toast("🎟️ Премиум-пасс активирован!"); }
+    else { A.fx.over(); UI.toast("Не хватает монет на пасс 🪙"); }
   }
 
   // ввод: тап по полю = поставить блок
@@ -95,13 +118,19 @@
       else { A.fx.over(); UI.toast("Не хватает монет 🪙"); } return; }
     if(el.dataset.equip){ S.equip(el.dataset.equip); A.fx.tap(); setScreen(UI.screenShop()); return; }
     if(el.dataset.claimq){ const r=Q.claim(S.s, el.dataset.claimq); if(r>0){ S.addCoins(r); A.fx.coin(); if(TG)TG.haptic("success"); S.save(); home(); UI.toast(`+${r} 🪙 за задание`);} return; }
+    if(el.dataset.claimfree){ claimSeason("free", parseInt(el.dataset.claimfree,10)); return; }
+    if(el.dataset.claimprem){ claimSeason("prem", parseInt(el.dataset.claimprem,10)); return; }
     const a=el.dataset.act; A.fx.tap();
+    if(a==="open-season"){ setScreen(UI.screenSeason()); return; }
+    if(a==="buy-pass"){ buyPass(); return; }
     if(a==="claim-reward"){
       const k=UI.dailyKeyNow();
       if(S.s.claimedRewardDay!==k){ S.touchDay(); const r=rewardFor(S.s.streak); S.s.claimedRewardDay=k; S.addCoins(r); S.save(); A.fx.coin(); if(TG)TG.haptic("success"); home(); UI.toast(`🎁 Ежедневная награда: <b>+${r} 🪙</b> · стрик ${S.s.streak}🔥`); }
       return;
     }
     if(a==="open-achs"){ setScreen(UI.screenAchs()); return; }
+    if(a==="how-ok"){ S.s.seenHow=true; S.save(); home(); return; }
+    if(a==="open-how"){ setScreen(UI.screenHow()); return; }
     if(a==="play-endless") startMode("endless");
     else if(a==="play-daily") startMode("daily");
     else if(a==="play-duel" && duel) startMode("duel", duel.seed);
@@ -119,5 +148,11 @@
   if(TG){ TG.ready(); const n=TG.user(); if(n && !S.s.name){ S.s.name=n; S.save(); } }
   parseURL();
   refreshMute();
-  home();
+  if(!S.s.seenHow){ setScreen(UI.screenHow()); } else { home(); }
+  // подтянуть облачный сейв (если он новее локального) — синк между устройствами
+  if(TG && TG.isTG){
+    TG.cloudGet("save", (v)=>{ if(!v) return;
+      try{ const data=JSON.parse(v); if((data.savedAt||0) > (S.s.savedAt||0)){ S.adopt(data); if(!playing){ if(S.s.seenHow) home(); } } }catch(e){}
+    });
+  }
 })();

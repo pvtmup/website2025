@@ -55,5 +55,14 @@
     return false;
   }
 
-  window.STACK_TG = { isTG, ready, user, startParam, haptic, deepLink, share, APP_URL };
+  // Telegram CloudStorage — синхрон сейва между устройствами
+  function cloudSet(key, val){
+    try{ const cs = wa && wa.CloudStorage; if(cs && cs.setItem) cs.setItem(key, val, ()=>{}); }catch(e){}
+  }
+  function cloudGet(key, cb){
+    try{ const cs = wa && wa.CloudStorage; if(cs && cs.getItem){ cs.getItem(key, (e,v)=>cb(e?null:v)); return; } }catch(e){}
+    cb(null);
+  }
+
+  window.STACK_TG = { isTG, ready, user, startParam, haptic, deepLink, share, cloudSet, cloudGet, APP_URL };
 })();

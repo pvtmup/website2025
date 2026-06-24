@@ -51,6 +51,7 @@
         </div>
         ${duelBanner}
         ${rewardBtn()}
+        ${seasonBanner()}
         <div class="menu">
           <button class="big-btn play" data-act="play-endless">▶ Играть</button>
           <button class="big-btn ghost" data-act="play-daily">📅 Дневной челлендж<span class="hint">сегодня · твой рекорд ${st.dailyKey===dailyKeyNow()?fmt(st.dailyBest):0}</span></button>
@@ -63,6 +64,67 @@
           <button class="m-btn" data-act="invite">📨 Позвать</button>
         </div>
         <p class="foot">Один тап — ставишь блок. Точно по центру — комбо и шире башня. Заходи каждый день: награда за стрик и новые задания.</p>
+      </div>`;
+  }
+
+  function screenHow(){
+    return `
+      <div class="scr how-scr">
+        <div></div>
+        <div class="how-mid">
+          <div class="logo" style="font-size:64px">СТЭК</div>
+          <div class="how-list">
+            <div class="how-i"><span>👆</span><div><b>Тап по экрану</b> — ставит движущийся блок на башню.</div></div>
+            <div class="how-i"><span>🎯</span><div><b>Точно по центру</b> — комбо растёт, башня даже шире.</div></div>
+            <div class="how-i"><span>✂️</span><div><b>Промах</b> режет край. Промахнулся мимо — конец.</div></div>
+            <div class="how-i"><span>✨</span><div><b>Золотой блок</b> по центру — бонусные монеты.</div></div>
+          </div>
+        </div>
+        <button class="big-btn play" data-act="how-ok">Поехали →</button>
+      </div>`;
+  }
+  function seasonBanner(){
+    const SE=window.STACK_SEASON, st=S.s; if(!SE) return "";
+    const c=SE.current(); SE.ensure(st);
+    const tier=SE.tierIndex(st.season.xp);
+    const next=SE.TRACK[tier];
+    const prevXp = tier>0?SE.TRACK[tier-1].xp:0;
+    const hiXp = next?next.xp:SE.TRACK[SE.TRACK.length-1].xp;
+    const pct = next? Math.min(100,((st.season.xp-prevXp)/(hiXp-prevXp))*100) : 100;
+    // есть ли что забрать
+    const claimable = SE.TRACK.some((t,i)=> st.season.xp>=t.xp && (!st.season.free.includes(i) || (st.season.owner && !st.season.prem.includes(i))));
+    return `<div class="season-ban" data-act="open-season">
+      <div class="spread"><div class="sb-name">${c.emoji} ${esc(c.name)} ${st.season.owner?'<span class="sb-pass">PASS</span>':''}</div><span class="sb-timer">⏳ ${c.daysLeft} дн.</span></div>
+      <div class="sb-bar"><div class="sb-fill" style="width:${pct}%"></div></div>
+      <div class="sb-sub">Уровень ${tier}/10 · ${st.season.xp} XP ${claimable?'· <b>есть награды →</b>':'· открыть'}</div>
+    </div>`;
+  }
+  function rewLabel(r){ return r.skin ? ("скин "+SK.byId(r.skin).name) : ("+"+r.coins+"🪙"); }
+  function screenSeason(){
+    const SE=window.STACK_SEASON, st=S.s; const c=SE.current(); SE.ensure(st);
+    const tier=SE.tierIndex(st.season.xp);
+    const rows = SE.TRACK.map((t,i)=>{
+      const reached = st.season.xp>=t.xp;
+      const fClaimed = st.season.free.includes(i), pClaimed = st.season.prem.includes(i);
+      const free = fClaimed?`<span class="q-done">✓</span>` : reached?`<button class="trk-btn free" data-claimfree="${i}">${rewLabel(t.free)}</button>` : `<span class="trk-lock">${rewLabel(t.free)}</span>`;
+      const prem = pClaimed?`<span class="q-done">✓</span>` : (st.season.owner ? (reached?`<button class="trk-btn prem" data-claimprem="${i}">${rewLabel(t.prem)}</button>`:`<span class="trk-lock">${rewLabel(t.prem)}</span>`) : `<span class="trk-lock">🔒 ${rewLabel(t.prem)}</span>`);
+      return `<div class="trk ${reached?'on':''}">
+        <div class="trk-lvl">${i+1}<span>${t.xp}xp</span></div>
+        <div class="trk-col"><div class="trk-cap">free</div>${free}</div>
+        <div class="trk-col"><div class="trk-cap gold">pass</div>${prem}</div>
+      </div>`;
+    }).join("");
+    const passBox = st.season.owner
+      ? `<div class="pass-on">🎟️ Премиум-пасс активен в этом сезоне</div>`
+      : `<button class="big-btn gold" data-act="buy-pass">🎟️ Активировать пасс — ${SE.PASS_COST} 🪙<span class="hint">открывает все премиум-награды сезона + эксклюзивные скины</span></button>`;
+    return `
+      <div class="scr">
+        <div class="bar"><button class="back" data-act="go-home">←</button><div class="bar-t">${c.emoji} ${esc(c.name)}</div><div class="st"><span>🪙</span> <b>${fmt(st.coins)}</b></div></div>
+        <p class="muted center" style="margin:2px 20px 10px">осталось ${c.daysLeft} дн. · уровень ${tier}/10 · ${st.season.xp} XP · играй, чтобы прокачивать</p>
+        ${passBox}
+        <div style="height:12px"></div>
+        <div class="track">${rows}</div>
+        <p class="foot">XP капает за каждый забег (выше башня и больше перфектов — больше XP). Сезон сменится через ${c.daysLeft} дн.</p>
       </div>`;
   }
 
@@ -164,5 +226,5 @@
   let toastT;
   function toast(html){ const el=document.getElementById("toast"); el.innerHTML=html; el.classList.add("show"); clearTimeout(toastT); toastT=setTimeout(()=>el.classList.remove("show"),2600); }
 
-  window.STACK_UI = { screenHome, screenOver, screenShop, screenBoard, screenAchs, toast, dailyKeyNow };
+  window.STACK_UI = { screenHome, screenOver, screenShop, screenBoard, screenAchs, screenSeason, screenHow, toast, dailyKeyNow };
 })();
