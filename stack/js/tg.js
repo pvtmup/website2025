@@ -67,5 +67,8 @@
     cb(null);
   }
 
-  window.STACK_TG = { isTG, ready, user, startParam, langCode, haptic, deepLink, share, cloudSet, cloudGet, APP_URL };
+  function back(show){ try{ const b=wa&&wa.BackButton; if(b){ show?b.show():b.hide(); } }catch(e){} }
+  function onBack(cb){ try{ const b=wa&&wa.BackButton; if(b&&b.onClick) b.onClick(cb); }catch(e){} }
+
+  window.STACK_TG = { isTG, ready, user, startParam, langCode, haptic, deepLink, share, cloudSet, cloudGet, back, onBack, APP_URL };
 })();

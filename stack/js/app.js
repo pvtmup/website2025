@@ -59,7 +59,7 @@
     S.touchDay();
     overlay.classList.add("hidden"); hud.classList.remove("hidden");
     hud.querySelector(".hud-score").textContent="0"; hud.querySelector(".hud-combo").style.opacity="0";
-    playing=true; game.start(curSeed);
+    playing=true; if(TG) TG.back(false); game.start(curSeed);
     A.startMusic(()=>game?game.score:0);
     if(coach){ if(S.s.games===0) coach.classList.remove("hidden"); else coach.classList.add("hidden"); }
   }
@@ -88,6 +88,7 @@
     setScreen(UI.screenOver({ score, best, coins:earned, maxCombo, mode, first:(S.s.games===1),
       target: (mode==="duel"&&duel)?duel.score:null, duelName: (mode==="duel"&&duel)?duel.name:null }));
     countUp(overlay.querySelector(".over-score"), score);
+    if(TG) TG.back(true);
     // тосты о заданиях/целях поверх
     let delay=400;
     doneQ.forEach(q=>{ const d=delay; delay+=1500; setTimeout(()=>{ A.fx.coin(); UI.toast(`✅ Задание: <b>${q.text}</b> — забери награду`); }, d); });
@@ -96,6 +97,7 @@
 
   const I18N=window.STACK_I18N;
   function setScreen(html){ overlay.innerHTML=I18N?I18N.t(html):html; overlay.classList.remove("hidden"); }
+  function openSub(html){ if(TG) TG.back(true); setScreen(html); }
   function localizeChrome(){
     if(!I18N) return;
     const hint=hud&&hud.querySelector(".hud-hint"); if(hint) hint.textContent=I18N.t("тап — поставить блок");
@@ -112,6 +114,7 @@
   function home(){
     Q.ensureDaily(S.s, UI.dailyKeyNow(), RNG.todaySeed().seed);
     SE.ensure(S.s); S.save();
+    if(TG) TG.back(false);
     setScreen(UI.screenHome(duel));
   }
 
@@ -150,14 +153,14 @@
     if(el.dataset.claimfree){ claimSeason("free", parseInt(el.dataset.claimfree,10)); return; }
     if(el.dataset.claimprem){ claimSeason("prem", parseInt(el.dataset.claimprem,10)); return; }
     const a=el.dataset.act; A.fx.tap();
-    if(a==="open-season"){ setScreen(UI.screenSeason()); return; }
+    if(a==="open-season"){ openSub(UI.screenSeason()); return; }
     if(a==="buy-pass"){ buyPass(); return; }
     if(a==="claim-reward"){
       const k=UI.dailyKeyNow();
       if(S.s.claimedRewardDay!==k){ S.touchDay(); const r=rewardFor(S.s.streak); S.s.claimedRewardDay=k; S.addCoins(r); S.save(); A.fx.coin(); if(TG)TG.haptic("success"); home(); UI.toast(`🎁 Ежедневная награда: <b>+${r} 🪙</b> · стрик ${S.s.streak}🔥`); }
       return;
     }
-    if(a==="open-achs"){ setScreen(UI.screenAchs()); return; }
+    if(a==="open-achs"){ openSub(UI.screenAchs()); return; }
     if(a==="how-ok"){ S.s.seenHow=true; S.save(); home(); return; }
     if(a==="open-how"){ setScreen(UI.screenHow()); return; }
     if(a==="play-endless") startMode("endless");
@@ -165,8 +168,8 @@
     else if(a==="play-duel" && duel) startMode("duel", duel.seed);
     else if(a==="retry") startMode(mode, mode==="endless"?null:curSeed);
     else if(a==="go-home") home();
-    else if(a==="open-shop") setScreen(UI.screenShop());
-    else if(a==="open-board") setScreen(UI.screenBoard());
+    else if(a==="open-shop") openSub(UI.screenShop());
+    else if(a==="open-board") openSub(UI.screenBoard());
     else if(a==="invite") SH.shareInvite().then(r=>{ UI.toast("📨 "+r); viralReward(r); });
     else if(a==="share") SH.shareResult(lastScore, curSeed, S.s.equipped, S.s.name).then(r=>{ UI.toast("⇪ "+r); viralReward(r); });
   });
@@ -192,7 +195,7 @@
   });
 
   // boot
-  if(TG){ TG.ready(); const n=TG.user(); if(n && !S.s.name){ S.s.name=n; S.save(); } }
+  if(TG){ TG.ready(); TG.onBack(()=>{ if(!playing) home(); }); const n=TG.user(); if(n && !S.s.name){ S.s.name=n; S.save(); } }
   // язык: сохранённый → из Telegram → ru по умолчанию
   (function(){ let lng=S.s.lang;
     if(!lng){ const lc=(TG&&TG.langCode?TG.langCode():"").toLowerCase(); lng = lc.startsWith("ru")?"ru":((TG&&TG.isTG)?"en":"ru"); }
