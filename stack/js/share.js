@@ -2,8 +2,8 @@
 (function(){
   const SK = window.STACK_SKINS;
   function baseUrl(){ return location.origin + location.pathname; }
-  function challengeLink(seed, score, name){
-    return baseUrl() + "?seed=" + (seed>>>0) + (score!=null?("&s="+score):"") + (name?("&n="+encodeURIComponent(name)):"");
+  function challengeLink(seed, score, name, cid){
+    return baseUrl() + "?seed=" + (seed>>>0) + (score!=null?("&s="+score):"") + (name?("&n="+encodeURIComponent(name)):"") + (cid?("&c="+cid):"");
   }
 
   function buildCard(score, seed, equippedId){
@@ -36,7 +36,7 @@
   async function shareResult(score, seed, equippedId, name){
     const TG = window.STACK_TG;
     // веб-ссылка надёжна везде (открывается в Telegram-браузере без зависимости от @бота)
-    const url = challengeLink(seed, score, name);
+    const url = challengeLink(seed, score, name, TG&&TG.userId?TG.userId():null);
     const text = `Я собрал ${score} в СТЭК 🧱 та же башня — побей меня:`;
     // внутри Telegram — нативный выбор чата
     if(TG && TG.isTG && TG.share(url, text)) return "вызов отправлен";

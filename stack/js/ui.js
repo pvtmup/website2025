@@ -219,9 +219,12 @@
     list.sort((a,b)=>b.sc-a.sc);
     return list;
   }
-  function screenBoard(){
+  function screenBoard(real){
     const st=S.s;
-    const rows = genBoard(RNG.todaySeed().seed, st.dailyKey===dailyKeyNow()?st.dailyBest:0)
+    const data = (real && real.length)
+      ? real.map(r=>({ n:r.name, sc:r.score, me:(r.name===(st.name||"Ты")) }))
+      : genBoard(RNG.todaySeed().seed, st.dailyKey===dailyKeyNow()?st.dailyBest:0);
+    const rows = data
       .map((r,i)=>`<div class="brow ${r.me?'me':''}"><span class="rk">${i+1}</span><span class="bn">${esc(r.n)} ${r.me?'<b>· ты</b>':''}</span><span class="bs">${fmt(r.sc)}</span></div>`).join("");
     return `
       <div class="scr">

@@ -12,16 +12,25 @@
    `https://pvtmup.github.io/website2025/stack/`
    После этого `t.me/<бот>` открывает игру, а ссылки-дуэли можно вернуть на бот-дип-линки (тогда в чате — аккуратная карточка-кнопка). Дай мне точный @username — переключу.
 
-## B. Монетизация за Telegram Stars (XTR)
-Telegram требует продавать цифровые товары только за **Stars**. Нужен маленький бэкенд (готов в `bot/payments.js`).
+## B. Бэкенд: удержание + монетизация (один сервис `bot/server.js`)
+`bot/server.js` — единый бэкенд без зависимостей. Делает и **удержание**, и **оплату Stars**.
 
-### Шаги
-1. **Включи платежи у бота**: они в Stars работают без provider-token (ничего настраивать в платёжке не надо).
-2. **Задеплой бэкенд** `bot/payments.js` на любой HTTPS-хост (Railway/Render/VPS/Cloudflare). Переменная `BOT_TOKEN`.
-3. **Пропиши URL** бэкенда в `stack/js/pay.js` → `PAY_API = "https://твой-хост/api"` (или без `/api`, как отдаёшь). Запушь.
-4. **Поставь вебхук** бота на оплату:
-   `https://api.telegram.org/bot<TOKEN>/setWebhook?url=https://твой-хост/webhook`
-5. Готово: в игре «★ Купить за Stars» создаст счёт (`createInvoiceLink`), Telegram проведёт оплату, бот подтвердит (`pre_checkout`/`successful_payment`), игра выдаст товар.
+### Деплой (один раз)
+1. Задеплой `bot/server.js` на любой HTTPS-хост (Railway/Render/VPS), переменная `BOT_TOKEN`. Получишь URL, напр. `https://host`.
+2. Пропиши этот URL в двух файлах и запушь:
+   - `stack/js/sync.js` → `SYNC_API = "https://host"`
+   - `stack/js/pay.js` → `PAY_API = "https://host"`
+3. Поставь вебхук бота:
+   `https://api.telegram.org/bot<TOKEN>/setWebhook?url=https://host/webhook`
+4. Поставь cron на стрик-напоминания (вечер):
+   `0 20 * * *  BOT_TOKEN=xxxx node bot/remind-streak.js`
+
+### Что включается
+- **Удержание (главное против «вышел-забыл»):**
+  - Mini App синкает статы (`/sync`); **пуш «стрик под угрозой»** тем, кто сегодня не играл (`remind-streak.js`).
+  - **Пуш «тебя обогнали в дуэли — реванш?»** тому, кто бросил вызов (`/duel/win`).
+  - **Настоящий дневной лидерборд** (`/leaderboard`) вместо симуляции.
+- **Монетизация (Stars):** «★ Купить за Stars» → `/invoice` (`createInvoiceLink`, XTR) → Telegram проводит оплату → вебхук подтверждает → игра выдаёт товар. Provider-token не нужен.
 
 ### Что продаётся (правится в `pay.js` + `bot/payments.js`, цены в Stars)
 - `pass` — премиум-пасс сезона (150⭐)

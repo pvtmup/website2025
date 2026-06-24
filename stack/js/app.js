@@ -28,8 +28,8 @@
       S.addCoins(150); localStorage.setItem("stack.refclaimed","1");
       setTimeout(()=>UI.toast(`<b>+150 🪙</b> бонус за приглашение`),600);
     }
-    // веб-фолбэк ?seed=&s=&n=
-    if(!duel && p.get("seed")){ duel={ seed:(parseInt(p.get("seed"),10)>>>0), score: p.get("s")?parseInt(p.get("s"),10):null, name: p.get("n")?decodeURIComponent(p.get("n")).slice(0,18):null }; }
+    // веб-фолбэк ?seed=&s=&n=&c=
+    if(!duel && p.get("seed")){ duel={ seed:(parseInt(p.get("seed"),10)>>>0), score: p.get("s")?parseInt(p.get("s"),10):null, name: p.get("n")?decodeURIComponent(p.get("n")).slice(0,18):null, challenger: p.get("c")||null }; }
     try{ history.replaceState(null,"",location.pathname); }catch(e){}
   }
 
@@ -75,6 +75,11 @@
     if(mode==="daily"){ const k=UI.dailyKeyNow(); if(S.s.dailyKey!==k){ S.s.dailyKey=k; S.s.dailyBest=0; } if(score>S.s.dailyBest) S.s.dailyBest=score; }
     S.s.games=(S.s.games||0)+1;
     S.s.totalPerfects=(S.s.totalPerfects||0)+perfectCount;
+    // сервер удержания: синк статов + пинг челленджеру при победе в дуэли
+    if(window.STACK_SYNC){
+      window.STACK_SYNC.syncStats();
+      if(mode==="duel" && duel && duel.challenger && score>(duel.score||0)) window.STACK_SYNC.duelWin(duel.challenger, score, duel.score||0);
+    }
     // прогресс заданий
     const doneQ = Q.applyResult(S.s, { score, perfects:perfectCount, maxCombo, mode });
     // долгосрочные цели (авто-награда)
@@ -98,6 +103,12 @@
   const I18N=window.STACK_I18N;
   function setScreen(html){ overlay.innerHTML=I18N?I18N.t(html):html; overlay.classList.remove("hidden"); }
   function openSub(html){ if(TG) TG.back(true); setScreen(html); }
+  async function openBoard(){
+    if(TG) TG.back(true);
+    let list=null;
+    if(window.STACK_SYNC && window.STACK_SYNC.enabled()) list=await window.STACK_SYNC.leaderboard();
+    setScreen(UI.screenBoard(list));
+  }
   function localizeChrome(){
     if(!I18N) return;
     const hint=hud&&hud.querySelector(".hud-hint"); if(hint) hint.textContent=I18N.t("тап — поставить блок");
@@ -177,7 +188,7 @@
     else if(a==="retry") startMode(mode, mode==="endless"?null:curSeed);
     else if(a==="go-home") home();
     else if(a==="open-shop") openSub(UI.screenShop());
-    else if(a==="open-board") openSub(UI.screenBoard());
+    else if(a==="open-board") openBoard();
     else if(a==="invite") SH.shareInvite().then(r=>{ UI.toast("📨 "+r); viralReward(r); });
     else if(a==="share") SH.shareResult(lastScore, curSeed, S.s.equipped, S.s.name).then(r=>{ UI.toast("⇪ "+r); viralReward(r); });
   });

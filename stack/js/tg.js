@@ -26,6 +26,10 @@
     try{ const u = wa && wa.initDataUnsafe && wa.initDataUnsafe.user;
       return u ? (u.first_name || u.username || "") : ""; }catch(e){ return ""; }
   }
+  function userId(){
+    try{ const u = wa && wa.initDataUnsafe && wa.initDataUnsafe.user; return u ? u.id : null; }catch(e){ return null; }
+  }
+  function initData(){ try{ return wa ? (wa.initData || "") : ""; }catch(e){ return ""; } }
   function startParam(){
     try{ return (wa && wa.initDataUnsafe && wa.initDataUnsafe.start_param) || ""; }catch(e){ return ""; }
   }
@@ -70,5 +74,5 @@
   function back(show){ try{ const b=wa&&wa.BackButton; if(b){ show?b.show():b.hide(); } }catch(e){} }
   function onBack(cb){ try{ const b=wa&&wa.BackButton; if(b&&b.onClick) b.onClick(cb); }catch(e){} }
 
-  window.STACK_TG = { isTG, ready, user, startParam, langCode, haptic, deepLink, share, cloudSet, cloudGet, back, onBack, APP_URL };
+  window.STACK_TG = { isTG, ready, user, userId, initData, startParam, langCode, haptic, deepLink, share, cloudSet, cloudGet, back, onBack, APP_URL };
 })();
