@@ -51,6 +51,8 @@ window.PRISM_GAME = (function(){
       const bw=cell*COLS, totalH=cell*ROWS;
       ox=(W-bw)/2; oy=top+(bh-totalH)/2;
       tileScale=(cell*0.92)/SRC;
+      // зона хвата на весь экран — иначе тапы ловятся только по пикселям фишек
+      app.stage.hitArea=new PIXI.Rectangle(0,0,W,H);
       // фон-пане на весь экран
       if(bgSprite){bgSprite.width=W;bgSprite.height=H;}
       reflow();
@@ -197,32 +199,36 @@ window.PRISM_GAME = (function(){
         swapData(a,b); await wait(190); busy=false; return;
       }
       moves--; cb.moves&&cb.moves(moves);
-      cascade=0; await resolve();
+      cascade=0;
+      try{ await resolve(); }catch(e){}   // что бы ни случилось — снимаем busy
       busy=false;
       if(moves<=0||!anyMove())end();
     }
 
     async function resolve(){
-      while(true){
+      let guard=0;
+      while(guard++<60){                       // жёсткий предел — никогда не зависнем
         const m=findMatches(); if(m.size===0)break;
         cascade++;
         let big=false; if(m.size>=4)big=true;
-        // удаляем
-        m.forEach(key=>{const [r,c]=key.split(",").map(Number);
-          const t=tiles[r][c]; if(!t)return;
+        // удаляем (каждая фишка в своём try — сбой одной не валит ход)
+        m.forEach(key=>{ try{
+          const [r,c]=key.split(",").map(Number);
+          const t=tiles[r][c]; if(!t){cells[r][c]=null;return;}
           const tint=parseInt((HUE[cells[r][c]].glow||"#ffffff").slice(1),16);
           flash(cx(c),cy(r),tint); burst(cx(c),cy(r),tint, big?14:9, big?1.5:1);
-          tween(t.scale,{x:0,y:0},0.2,E.inQuad,()=>t.destroy());
+          tween(t.scale,{x:0,y:0},0.2,E.inQuad,()=>{try{t.destroy();}catch(e){}});
           tween(t._glow,{alpha:1.2},0.12,E.outCubic);
           cells[r][c]=null; tiles[r][c]=null;
-        });
+        }catch(e){ const [r,c]=key.split(",").map(Number); cells[r][c]=null; tiles[r][c]=null; } });
         score+=m.size*30*cascade + (big?100:0);
         cb.score&&cb.score(score,cascade);
         AUD&&AUD.fx.clear(cascade); if(big)AUD&&AUD.fx.boom();
         if(window.Telegram&&Telegram.WebApp&&Telegram.WebApp.HapticFeedback){
           try{Telegram.WebApp.HapticFeedback.impactOccurred(big?"medium":"light");}catch(e){}}
         await wait(200);
-        gravity(); await wait(360);
+        try{ gravity(); }catch(e){}
+        await wait(360);
       }
     }
 
