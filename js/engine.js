@@ -265,6 +265,17 @@
     return { ep, won, yourPct, theirPct:100-yourPct, costarName:costar.name };
   }
 
+  /* ---- EPISODE DROP: weekly limited-time themed event ---- */
+  function currentDrop(){
+    const dayMs = 86400000;
+    const days = Math.floor(Date.now()/dayMs);
+    const week = Math.floor(days/7);
+    const drop = D.drops[((week % D.drops.length)+D.drops.length)%D.drops.length];
+    const endTs = (week+1)*7*dayMs;
+    const daysLeft = Math.max(1, Math.ceil((endTs-Date.now())/dayMs));
+    return { ...drop, week, daysLeft };
+  }
+
   /* ---- LORE BUG BOUNTY: surface a funny showrunner slip ---- */
   function reportBug(state){
     const txt = rnd(D.loreBugs).replace(/\{you\}/g, state.name||"You");
@@ -399,6 +410,6 @@
     generateEpisode, applyChoice, scoreEpisode, runWhileAway,
     buildFeed, tierForFans, nextTier, grad, rnd, rint,
     genFanComments, writersToday, generateRetcon, resolveDuel, reportBug,
-    generateCrossover, buildDiscover, generateGuestEpisode
+    generateCrossover, buildDiscover, generateGuestEpisode, currentDrop
   };
 })();

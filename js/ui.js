@@ -249,6 +249,7 @@
         ${topbar()}
         ${fansMeter()}
         <div style="height:14px"></div>
+        ${dropBanner()}
         ${nudge}
         ${body}
         <p class="foot">Мир продолжает жить, пока тебя нет. Возвращайся — узнаешь, что изменилось.</p>
@@ -451,6 +452,7 @@
         <div class="hero">
           <div class="ring" style="${avatarStyle(st.name)}">${initial(st.name)}</div>
           <div class="hn">${esc(st.name||"Ты")}</div>
+          ${st.equippedTitle?`<div class="hero-title">🏅 ${esc(st.equippedTitle)}</div>`:""}
           <div class="ha">${arch.emoji} ${esc(arch.name)} · ${esc(st.worldName)}</div>
         </div>
         <div class="statgrid">
@@ -473,6 +475,58 @@
           <button class="btn ghost" data-act="open-settings">⚙ Настройки и ИИ</button>
         </div>
         <p class="foot">LORE · концепт-сборка · ${window.LORE_AI&&window.LORE_AI.enabled()?'✨ Живой ИИ включён':'встроенный режиссёр'} · работает в браузере.</p>
+      </div>`;
+  }
+
+  /* ---------------- EPISODE DROP / БАТЛ-ПАСС ---------------- */
+  function dropBanner(){
+    const st = S.state; const d = E.currentDrop();
+    const next = D.dropTrack.find(t=>t.at>st.dropPoints);
+    const prevAt = (()=>{ let p=0; for(const t of D.dropTrack){ if(t.at<=st.dropPoints) p=t.at; } return p; })();
+    const hiAt = next? next.at : (D.dropTrack[D.dropTrack.length-1].at);
+    const pct = next? Math.min(100, ((st.dropPoints-prevAt)/(hiAt-prevAt))*100) : 100;
+    return `
+      <div class="drop-ban" data-act="open-drop" style="background:linear-gradient(135deg,${d.g[0]},${d.g[1]})">
+        <div class="spread"><div class="drop-name">${d.emoji} ${esc(d.name)}</div><span class="drop-timer">⏳ ${d.daysLeft} дн.</span></div>
+        <div class="drop-bar"><div class="drop-fill" style="width:${pct}%"></div></div>
+        <div class="drop-sub">${esc(d.desc)} · ${st.dropPoints} очков · открыть награды →</div>
+      </div>`;
+  }
+
+  function dropSheet(){
+    const st = S.state; const d = E.currentDrop();
+    const rows = D.dropTrack.map((t,i)=>{
+      const reached = st.dropPoints>=t.at;
+      const claimed = st.dropClaimed.includes(i);
+      let right;
+      if(claimed) right = `<span style="color:var(--gold)">✓</span>`;
+      else if(reached && t.premium && !st.plus) right = `<button class="mini gold" data-act="open-plus">🔒 LORE+</button>`;
+      else if(reached && t.premium) right = `<button class="mini gold" data-claimdrop="${i}">Забрать</button>`;
+      else if(reached) right = `<span style="color:var(--gold)">✓</span>`;
+      else right = `<span class="faint">${t.at} очк.</span>`;
+      return `<div class="drow ${reached?'reached':''}">
+        <div class="dnum">${t.at}</div>
+        <div style="flex:1"><div class="dttl">${esc(t.title)}</div>${t.premium?'<div class="dprem">LORE+ награда</div>':'<div class="dprem free">бесплатно</div>'}</div>
+        ${right}
+      </div>`;
+    }).join("");
+    return `
+      <div class="sheet-wrap" data-act="close-sheet">
+        <div class="sheet" data-stop="1" style="max-height:88%;overflow-y:auto">
+          <div class="center">
+            <div class="kicker" style="color:var(--gold)">Дроп недели · ⏳ ${d.daysLeft} дн.</div>
+            <h2 class="title-l" style="margin:6px 0 2px">${d.emoji} ${esc(d.name)}</h2>
+            <p class="muted" style="font-size:13px">${esc(d.desc)}</p>
+            <div class="kicker" style="margin-top:10px">${st.dropPoints} очков дропа</div>
+          </div>
+          <div style="height:14px"></div>
+          <div class="drows">${rows}</div>
+          <div style="height:14px"></div>
+          <button class="btn gold" data-act="drop-play">▶ Снять эпизод дропа (+очки)</button>
+          <div style="height:8px"></div>
+          <button class="btn ghost" data-act="close-sheet">Закрыть</button>
+          <p class="foot">Очки капают за каждый эпизод, дуэль, реткон и кроссовер. Дроп сменится через ${d.daysLeft} дн. — успей забрать награды.</p>
+        </div>
       </div>`;
   }
 
@@ -574,7 +628,7 @@
   window.LORE_UI = {
     viewIntro, viewOnboardName, viewOnboardArchetype, viewOnboardWorld, viewOnboardCast, viewGenerating,
     viewHome, viewFeed, viewDiscover, viewRoom, viewCast, viewProfile, episodeCard,
-    plusSheet, settingsSheet, inviteSheet, toast,
+    plusSheet, settingsSheet, inviteSheet, dropSheet, toast,
     avatarStyle, initial, esc,
   };
 })();

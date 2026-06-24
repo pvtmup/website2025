@@ -141,6 +141,32 @@
     checkAchievements(null,null);
   }
 
+  /* ---------------- Episode Drop / батл-пасс ---------------- */
+  function syncDrop(){
+    const d=E.currentDrop(); const st=S.state;
+    if(st.dropWeek!==d.week){ st.dropWeek=d.week; st.dropPoints=0; st.dropClaimed=[]; S.save(); }
+  }
+  function addDropProgress(n){
+    const st=S.state; st.dropPoints=(st.dropPoints||0)+n; let delay=1700;
+    D.dropTrack.forEach((t,i)=>{
+      if(!t.premium && st.dropPoints>=t.at && !st.dropClaimed.includes(i)){
+        st.dropClaimed.push(i); st.equippedTitle=t.title;
+        const ti=t; const dd=delay; delay+=1400;
+        setTimeout(()=>{ sfx("achieve"); UI.toast(`<span class="tt">🏅 Награда дропа</span> Титул «${UI.esc(ti.title)}» разблокирован`); }, dd);
+      }
+    });
+    S.save();
+  }
+  function claimDrop(i){
+    const st=S.state; const t=D.dropTrack[i]; if(!t) return;
+    if(st.dropPoints<t.at) return;
+    if(t.premium && !st.plus){ sfx("error"); return; }
+    if(!st.dropClaimed.includes(i)) st.dropClaimed.push(i);
+    st.equippedTitle=t.title; S.save();
+    sfx("achieve"); closeSheet(); screen.insertAdjacentHTML("beforeend", UI.dropSheet());
+    UI.toast(`<span class="tt">🏅 Награда забрана</span> Титул «${UI.esc(t.title)}»`);
+  }
+
   /* ---------------- Discover / Guest Star ---------------- */
   function guestStar(i){
     const st=S.state; const creator=discoverList[i]; if(!creator) return;
@@ -188,6 +214,7 @@
     st.activeEp = null;
     S.touchDay(); S.save();
 
+    addDropProgress(ep.isFinale?90:50);
     sfx(score.viral ? "viral" : "fans");
     render();
     // animate the just-played (now most recent in history) card into view
@@ -280,6 +307,7 @@
     ep.comments=E.genFanComments(st, ep, score);
     st.episodes.push(ep); if(res.won) S.unlock("canonduel");
     S.touchDay(); S.save();
+    addDropProgress(45);
     sfx(res.won?"level":"error");
     route="home"; render();
     setTimeout(()=>{ const el=document.getElementById("ep-"+ep.num); if(el) el.scrollIntoView({behavior:"smooth",block:"center"}); }, 100);
@@ -348,6 +376,9 @@
     const guestBtn = e.target.closest("[data-guest]");
     if(guestBtn){ guestStar(parseInt(guestBtn.dataset.guest,10)); return; }
 
+    const claimBtn = e.target.closest("[data-claimdrop]");
+    if(claimBtn){ claimDrop(parseInt(claimBtn.dataset.claimdrop,10)); return; }
+
     const tab = e.target.closest(".tab");
     if(tab){ sfx("tap"); route = tab.dataset.view; render(); return; }
 
@@ -381,6 +412,8 @@
       else if(a==="open-plus"){ sfx("pick"); screen.insertAdjacentHTML("beforeend", UI.plusSheet()); }
       else if(a==="buy-plus"){ S.state.plus=true; S.save(); closeSheet(); render(); sfx("achieve"); UI.toast(`<span class="tt">LORE+ активен</span> · добро пожаловать под софиты`); }
       else if(a==="open-settings"){ sfx("pick"); screen.insertAdjacentHTML("beforeend", UI.settingsSheet()); }
+      else if(a==="open-drop"){ sfx("pick"); screen.insertAdjacentHTML("beforeend", UI.dropSheet()); }
+      else if(a==="drop-play"){ closeSheet(); shootNext(); }
       else if(a==="close-sheet"){ sfx("tap"); closeSheet(); }
       else if(a==="accept-invite"){
         sfx("fans"); const inv=incomingInvite; incomingInvite=null; closeSheet();
@@ -459,6 +492,7 @@
     st.episodes.push(ep);
     S.touchDay(); S.save();
 
+    addDropProgress(45);
     sfx(score.viral?"viral":"achieve");
     render();
     setTimeout(()=>{ const el=document.getElementById("ep-"+ep.num); if(el) el.scrollIntoView({behavior:"smooth",block:"center"}); }, 80);
@@ -500,11 +534,12 @@
     incomingInvite = parseInvite();
     if(st.onboarded){
       S.touchDay();
+      syncDrop();
       const missed = E.runWhileAway(st);
       S.save();
       render();
       if(missed && missed.hrs>0.02 && !incomingInvite){
-        setTimeout(()=>UI.toast(`<span class="tt">While you were gone —</span> ${UI.esc(missed.missed)} (+${S.fmt(missed.drift)} fans)`), 700);
+        setTimeout(()=>UI.toast(`<span class="tt">Пока тебя не было —</span> ${UI.esc(missed.missed)} (+${S.fmt(missed.drift)} фанатов)`), 700);
       }
     } else {
       render();

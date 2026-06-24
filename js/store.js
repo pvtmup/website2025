@@ -17,6 +17,7 @@
     streak:1, lastDay:null,
     writersDay:null, writersChoice:null,  // daily Writers' Room vote
     sabotageDay:null, pendingTwist:null,  // anonymous twist injected into next episode
+    dropWeek:null, dropPoints:0, dropClaimed:[], equippedTitle:null,  // Episode Drop / battle pass
     plus:false,
     lastSeen:Date.now(),
     created:Date.now(),
