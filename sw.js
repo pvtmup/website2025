@@ -1,5 +1,5 @@
 /* LORE service worker — app-shell cache, offline-first */
-const CACHE = "lore-v2";
+const CACHE = "lore-v3-ru";
 const SHELL = [
   "./","./index.html","./css/styles.css",
   "./js/data.js","./js/art.js","./js/engine.js","./js/store.js",

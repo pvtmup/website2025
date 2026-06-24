@@ -1,242 +1,240 @@
 /* ============================================================
-   LORE — content & narrative grammar
-   This is the "writers' room" the AI showrunner draws from.
-   Everything is parameterized with {you}, {co}, {world}, etc.
+   LORE — контент и нарративная грамматика (RU)
+   «писательская комната», из которой ИИ-шоураннер берёт материал.
+   Плейсхолдеры: {you}=ты, {co}=со-актёр, {world}/{world2}=миры,
+   {a}/{b}=со-актёры, {host}=создатель.
    ============================================================ */
 window.LORE_DATA = {
 
   archetypes: [
-    { id:"star",     emoji:"🌟", name:"The Star",     desc:"Born for the spotlight. Adored, envied, watched.",      g:["#ff9d3d","#7a1538"], accent:"#ffd66b" },
-    { id:"rebel",    emoji:"🔥", name:"The Rebel",    desc:"Breaks the rules everyone else obeys.",                g:["#ff4d6d","#2a1147"], accent:"#ff6b3d" },
-    { id:"mystery",  emoji:"🌙", name:"The Mystery",  desc:"Nobody knows your real story. Yet.",                   g:["#243b8f","#06121f"], accent:"#5cd6ff" },
-    { id:"lover",    emoji:"💗", name:"The Heart",    desc:"Every season turns on who you choose.",                g:["#ff7eb6","#3a1255"], accent:"#ff9ed1" },
-    { id:"trickster",emoji:"🎭", name:"The Trickster",desc:"Chaos follows you and the fans love it.",               g:["#19c0a8","#241050"], accent:"#19e6c1" },
-    { id:"underdog", emoji:"⚡", name:"The Underdog", desc:"Counted out. About to flip the whole world.",          g:["#ffd66b","#5e2a0e"], accent:"#ffb43d" },
+    { id:"star",     emoji:"🌟", name:"Звезда",      desc:"Рождён(а) для софитов. Обожают, завидуют, смотрят.", g:["#ff9d3d","#7a1538"], accent:"#ffd66b" },
+    { id:"rebel",    emoji:"🔥", name:"Бунтарь",     desc:"Ломает правила, которым подчиняются все.",            g:["#ff4d6d","#2a1147"], accent:"#ff6b3d" },
+    { id:"mystery",  emoji:"🌙", name:"Загадка",     desc:"Никто не знает твою настоящую историю. Пока что.",    g:["#243b8f","#06121f"], accent:"#5cd6ff" },
+    { id:"lover",    emoji:"💗", name:"Сердце",       desc:"Каждый сезон решает, кого ты выберешь.",              g:["#ff7eb6","#3a1255"], accent:"#ff9ed1" },
+    { id:"trickster",emoji:"🎭", name:"Трикстер",    desc:"За тобой ходит хаос, и фанаты это обожают.",          g:["#19c0a8","#241050"], accent:"#19e6c1" },
+    { id:"underdog", emoji:"⚡", name:"Тёмная лошадка",desc:"Тебя списали со счетов. Зря.",                       g:["#ffd66b","#5e2a0e"], accent:"#ffb43d" },
   ],
 
   worlds: [
-    { id:"neon",    emoji:"🌆", name:"Neon City",      desc:"Rooftop parties, secret clubs, midnight deals.",   g:["#1a0b2e","#3d1361"] },
-    { id:"academy", emoji:"🎓", name:"Elite Academy",  desc:"Old money, sharp rivalries, forbidden romance.",   g:["#0d1b2a","#1b3a4b"] },
-    { id:"fame",    emoji:"🎬", name:"Fame Heights",   desc:"Influencers, labels, the climb to the top.",       g:["#2a0a1f","#5e1239"] },
-    { id:"realm",   emoji:"🗡️", name:"The Riven Realm",desc:"Crowns, prophecies, blades in the dark.",          g:["#0a1a14","#143a2a"] },
-    { id:"after",   emoji:"🌌", name:"Afterglow",      desc:"A city that never sleeps, between worlds.",         g:["#150a2a","#2e1b5e"] },
+    { id:"neon",    emoji:"🌆", name:"Неон-Сити",     desc:"Вечеринки на крышах, тайные клубы, ночные сделки.", g:["#1a0b2e","#3d1361"] },
+    { id:"academy", emoji:"🎓", name:"Элитная академия",desc:"Старые деньги, острое соперничество, запретные чувства.", g:["#0d1b2a","#1b3a4b"] },
+    { id:"fame",    emoji:"🎬", name:"Высоты славы",  desc:"Инфлюенсеры, лейблы, путь на вершину.",            g:["#2a0a1f","#5e1239"] },
+    { id:"realm",   emoji:"🗡️", name:"Расколотое королевство",desc:"Короны, пророчества, клинки в темноте.",   g:["#0a1a14","#143a2a"] },
+    { id:"after",   emoji:"🌌", name:"Послесвет",      desc:"Город, который не спит, на грани миров.",          g:["#150a2a","#2e1b5e"] },
   ],
 
-  // suggested co-stars when the player has no real friends to invite yet
-  seedNames: ["Kai","Mira","Dev","Luna","Theo","Nova","Zane","Ivy","Rio","Sage","Jin","Esme","Cole","Wren","Ash","Remy"],
+  seedNames: ["Кай","Мира","Дэв","Луна","Тео","Нова","Зейн","Айви","Рио","Сейдж","Джин","Эсме","Коул","Рен","Эш","Реми"],
 
   relationships: {
-    ally:   { label:"Ally",   color:"var(--ally)",   verb:"has your back" },
-    rival:  { label:"Rival",  color:"var(--rival)",  verb:"wants you gone" },
-    love:   { label:"Love",   color:"var(--love)",   verb:"can't stay away" },
-    secret: { label:"Secret", color:"var(--secret)", verb:"knows something" },
+    ally:   { label:"Союзник", color:"var(--ally)",   verb:"прикроет тебя" },
+    rival:  { label:"Враг",    color:"var(--rival)",  verb:"хочет тебя убрать" },
+    love:   { label:"Любовь",  color:"var(--love)",   verb:"не может держаться в стороне" },
+    secret: { label:"Тайна",   color:"var(--secret)", verb:"что-то знает" },
   },
 
-  // status ladder (fans needed)
   tiers: [
-    { id:0, name:"Nameless",            req:0 },
-    { id:1, name:"Character w/ Lore",   req:300 },
-    { id:2, name:"Local Star",          req:1500 },
-    { id:3, name:"Legend of the Season",req:7000 },
-    { id:4, name:"CANON",               req:25000 },
+    { id:0, name:"Никто",            req:0 },
+    { id:1, name:"Свой лор",         req:300 },
+    { id:2, name:"Местная звезда",   req:1500 },
+    { id:3, name:"Легенда сезона",   req:7000 },
+    { id:4, name:"КАНОН",            req:25000 },
   ],
 
   achievements: [
-    { id:"pilot",     icon:"🎬", t:"Pilot Aired",         d:"You shot your very first episode." },
-    { id:"firstfan",  icon:"💜", t:"First 100 Fans",      d:"Someone out there is rooting for you." },
-    { id:"costar",    icon:"🤝", t:"Co-Star Cast",        d:"You pulled a real person into your story." },
-    { id:"cliff",     icon:"😱", t:"Cliffhanger King",    d:"An episode of yours broke 10k views." },
-    { id:"heartbreak",icon:"💔", t:"Heartbreak Arc",      d:"You let a love line burn. Iconic." },
-    { id:"villain",   icon:"😈", t:"Main Villain",        d:"You chose chaos. The fans ate it up." },
-    { id:"streak",    icon:"🔥", t:"7-Day Streak",        d:"A week of episodes. The algorithm noticed." },
-    { id:"viral",     icon:"🚀", t:"Gone Viral",          d:"A clip of yours left the app." },
-    { id:"legend",    icon:"👑", t:"Legend of the Season",d:"You climbed past 7,000 fans." },
-    { id:"canon",     icon:"🏛️", t:"Written into Canon",  d:"You are now permanent LORE." },
-    { id:"retconwar", icon:"↺",  t:"Retcon War",          d:"You rewrote the past. History is yours now." },
-    { id:"canonduel", icon:"⚔️", t:"Canon Duel",          d:"You took a story dispute to the room — and won." },
-    { id:"bughunter", icon:"🐛", t:"Lore Bug Bounty",     d:"You caught the showrunner slipping. Iconic." },
-    { id:"caster",    icon:"📨", t:"Casting Director",     d:"A friend accepted their role in your series." },
-    { id:"saboteur",  icon:"🕵️", t:"The Saboteur",         d:"You injected an anonymous twist into the canon." },
-    { id:"crossover", icon:"🌀", t:"Cursed Crossover",     d:"You collided two worlds into one cursed episode." },
-    { id:"gueststar", icon:"🎬", t:"Guest Star",           d:"You guest-starred in someone else's series." },
+    { id:"pilot",     icon:"🎬", t:"Пилот вышел",        d:"Ты снял(а) свой самый первый эпизод." },
+    { id:"firstfan",  icon:"💜", t:"Первые 100 фанатов",  d:"Кто-то там за тебя болеет." },
+    { id:"costar",    icon:"🤝", t:"Каст набран",         d:"Ты втянул(а) реального человека в свою историю." },
+    { id:"cliff",     icon:"😱", t:"Король клиффхэнгеров",d:"Твой эпизод пробил 10к просмотров." },
+    { id:"heartbreak",icon:"💔", t:"Арка разбитого сердца",d:"Ты дал(а) любовной линии сгореть. Иконично." },
+    { id:"villain",   icon:"😈", t:"Главный злодей",      d:"Ты выбрал(а) хаос. Фанаты в восторге." },
+    { id:"streak",    icon:"🔥", t:"Стрик 7 дней",        d:"Неделя эпизодов. Алгоритм заметил." },
+    { id:"viral",     icon:"🚀", t:"Завирусилось",        d:"Твой клип вышел за пределы приложения." },
+    { id:"legend",    icon:"👑", t:"Легенда сезона",      d:"Ты перевалил(а) за 7000 фанатов." },
+    { id:"canon",     icon:"🏛️", t:"Вписан(а) в канон",   d:"Теперь ты — постоянный LORE." },
+    { id:"retconwar", icon:"↺",  t:"Реткон-война",        d:"Ты переписал(а) прошлое. История теперь твоя." },
+    { id:"canonduel", icon:"⚔️", t:"Канон-дуэль",         d:"Ты вынес(ла) спор в зал — и победил(а)." },
+    { id:"bughunter", icon:"🐛", t:"Охота на баги лора",  d:"Ты поймал(а) шоураннера на ошибке. Иконично." },
+    { id:"caster",    icon:"📨", t:"Кастинг-директор",    d:"Друг принял роль в твоём сериале." },
+    { id:"saboteur",  icon:"🕵️", t:"Саботажник",          d:"Ты анонимно вбросил(а) твист в канон." },
+    { id:"crossover", icon:"🌀", t:"Проклятый кроссовер", d:"Ты столкнул(а) два мира в одном эпизоде." },
+    { id:"gueststar", icon:"🎬", t:"Приглашённая звезда", d:"Ты появился(ась) гостем в чужом сериале." },
   ],
 
-  // DISCOVER — other creators' ongoing series you can guest-star in
-  creatorTaglines: [
-    " in their villain era","fresh off a season finale","the most shipped cast this week",
-    "down bad and trending","one betrayal from CANON","rewriting their whole lore",
-    "currently at war with their own cast","accidentally went viral last night",
+  /* ---------------- НАРРАТИВНАЯ ГРАММАТИКА ---------------- */
+
+  // полные названия эпизодов (без склеивания — чтобы не было ошибок согласования)
+  episodeTitles: [
+    "Последнее признание","Тайное предательство","Полночный поцелуй","Украденная корона",
+    "Запретное обещание","Сломанная клятва","Золотая ложь","Жестокий выбор","Тихая война",
+    "Сладкая месть","Скрытая правда","Дерзкий побег","Двойная игра","Последний танец",
+    "Прощание в огне","Холодный расчёт","Опасная сделка","Ночь без свидетелей",
   ],
+  finaleTitles: ["ФИНАЛ СЕЗОНА: Всё сгорит","ФИНАЛ СЕЗОНА: Последняя корона","ФИНАЛ СЕЗОНА: Никто не уйдёт","ФИНАЛ СЕЗОНА: Правда, наконец"],
+
+  // холодные открытия по архетипу
+  opens: {
+    star:    ["Весь {world} смотрел, когда {you} вошёл(ла) — и {you} это обожал(а).",
+              "Камеры, шёпот, вспышки. {you} владел(а) залом ещё до первого слова."],
+    rebel:   ["{you} не должен(на) был(а) быть здесь сегодня. В этом и был смысл.",
+              "Правила созданы, чтобы их ломать, и у {you} был длинный список."],
+    mystery: ["Никто в {world} не мог сказать, откуда {you}. От этого все только тянулись ближе.",
+              "{you} прятал(а) по одной тайне за каждой улыбкой. Сегодня одна выскользнула."],
+    lover:   ["Сегодня {you} хотели двое. Испортить {you} мог(ла) только одного.",
+              "{you} клялся(ась) больше не влюбляться. У {world} были другие планы."],
+    trickster:["{you} запустил(а) всё это просто чтобы посмотреть, что будет.",
+              "У хаоса в {world} есть любимчик, и сегодня он носил лицо {you}."],
+    underdog:["Над {you} смеялись в прошлом сезоне. Сейчас уже никто не смеялся.",
+              "{you} нечего было терять — а в {world} это делало {you} опасным(ой)."],
+  },
+
+  // средние биты по типу отношений со-актёра в сцене
+  beats: {
+    ally:   ["{co} отвёл(ла) {you} в сторону. «Что бы ни случилось дальше — я с тобой. Не подведи.»",
+             "{co} прикрыл(а) {you}, когда это было важно. Теперь {co} ждал(а) ответной услуги.",
+             "«Делаем это вместе или никак», — сказал(а) {co}, глядя прямо на {you}."],
+    rival:  ["{co} улыбнулся(ась) так, как умеют только враги. «Наслаждайся вечером. Он последний, что ты выиграл(а).»",
+             "{co} коллекционировал(а) ошибки {you}, как трофеи. Сегодня одна пошла в дело.",
+             "Через зал {co} поднял(а) бокал за {you} — тост, похожий на угрозу."],
+    love:   ["{co} подошёл(ла) так близко, что {you} забыл(а) про весь остальной {world}.",
+             "«Скажи уйти — и я уйду», — прошептал(а) {co}. {you} не сказал(а).",
+             "{co} вложил(а) записку в руку {you} и исчез(ла) раньше, чем {you} успел(а) прочитать."],
+    secret: ["{co} знал(а). {you} это видел(а). Вопрос был только в цене молчания.",
+             "«Я видел(а), что ты сделал(а)», — пробормотал(а) {co}. — «И ещё не решил(а), что с этим делать.»",
+             "{co} подвинул(а) телефон через стол. Одно фото. Весь мир {you} на экране."],
+  },
+
+  solo: ["Телефон {you} зажёгся сообщением с номера без имени.",
+         "Музыка стихла, свет погас, и все головы в {world} повернулись к {you}.",
+         "{you} нашёл(ла) ту самую дверь в {world}, которая никогда не должна была открыться — приоткрытой.",
+         "Пришло приглашение в золотом конверте. Без отправителя. Только имя {you}."],
+
+  cliffs: ["И тут двери распахнулись — и вошёл тот, кого {you} считал(а) ушедшим навсегда.",
+           "Телефон {you} вздрогнул один раз. Сообщение гласило: «Они знают».",
+           "Свет снова зажёгся. Все смотрели на {you}. Кто-то назвал имя {you} со сцены.",
+           "И в этот момент {you} понял(а): весь вечер был подставой — от того, кому {you} доверял(а).",
+           "На зеркале помадой ждало одно слово. Имя {you}, перечёркнутое.",
+           "Экран погас. Когда он зажёгся снова, {you} был(а) в тренде по всему {world}."],
+
+  // выборы после эпизода. {a}/{b} — имена со-актёров. ИНДЕКС 1 — обязательно «выбор любви»
+  choiceSets: [
+    [ {t:"Выйти на них при всех",            k:"🔥", tag:"дерзко",  eff:{rival:+2, fans:1.4}},
+      {t:"Уйти тихо и сохранить тайну",       k:"🌙", tag:"хитро",   eff:{secret:+2, fans:1.0}},
+      {t:"Устроить публичное шоу",            k:"🎭", tag:"хаос",    eff:{fans:1.7, rival:+1}} ],
+    [ {t:"Выбрать {a}",                       k:"💗", tag:"романтика", eff:{love:+3, fans:1.3}},
+      {t:"Выбрать {b}",                       k:"💞", tag:"романтика", eff:{love:+3, fans:1.3}},
+      {t:"Не выбрать никого. Выбрать корону.",k:"👑", tag:"власть",   eff:{fans:1.5}} ],
+    [ {t:"Довериться {a} во всём",            k:"🤝", tag:"верность", eff:{ally:+3, fans:1.1}},
+      {t:"Предать {a}, пока не предали тебя", k:"🗡️", tag:"злодей",   eff:{rival:+3, fans:1.6}},
+      {t:"Исчезнуть и заставить гадать",      k:"💨", tag:"загадка",  eff:{secret:+2, fans:1.2}} ],
+    [ {t:"Сжечь всё дотла",                   k:"💥", tag:"хаос",     eff:{fans:1.9, rival:+2}},
+      {t:"Играть в долгую",                   k:"♟️", tag:"власть",   eff:{fans:1.2, ally:+1}},
+      {t:"Сказать правду, наконец",           k:"🕊️", tag:"честно",   eff:{love:+1, fans:1.4}} ],
+  ],
+
+  // лента трендов: фейковые, но правдоподобные другие «создатели»
+  feedNames: ["@стерлинг","@юки.exe","@безкороны","@рея_встаёт","@безфамилии","@корольвторника",
+              "@вельвет","@дьявол_мб","@офелия.mp4","@последняяпесня","@апекс.ари","@мисс.полночь"],
+  feedTitles: ["Последнее признание","Преданы на балу","Она выбрала не того","Ограбление в прямом эфире",
+               "Коронован(а) и в розыске","Поцелуй, что закрыл сезон","Попались на камеру","Двойная игра",
+               "Полночный переворот","Тайный близнец","Сжёг(ла) все мосты","Случайно в тренде"],
+
+  fanNames: ["@фанат№1","@плоттвист","@рыдаю_щас","@команда_{you}","@нетвоябэйба","@лорхед","@с1с7",
+             "@полночный.кат","@немогужить","@шиппер.exe","@сертифицированный.фан","@мысли_в_4утра","@это_вайб",
+             "@главныйгерой","@это_дичь","@пересматриваю","@в_слезах","@вечноонлайн"],
+  fanComments: {
+    hype:  ["никто не делает как {you} 😭🔥","ор этот эпизод имба","{you} — эталон fr","так, ГЛАВНЫЙ ГЕРОЙ энергия 💅","настолько кинематографично что не могу","{you} такой(ая): дайте я их уничтожу ✋"],
+    ship:  ["{you} x {co} или я в ауте 😩","это НАПРЯЖЕНИЕ между {you} и {co}, алё??","шипперю, простите","{co}, посмотри на {you} ещё раз — челлендж","они буквально эндгейм, хватит"],
+    shock: ["НЕТ потому что этот клиффхэнгер 😱","я ахнул(а) прямо в метро","ору на телефон","КТО это допустил","плот-армор где? {you} в ОПАСНОСТИ"],
+    villain:["{you} — злодей, которого мы заслужили 😈","не {you} быть иконой И злом одновременно","ну он(а) ведь прав(а)","арка злодея сезона fr","я боюсь {you}, но уважаю"],
+  },
+
+  // Режиссёрка — ежедневные голосования за повороты
+  writersPrompts: [
+    { setup:"Шоураннер решает первый твист следующего сезона. Голосуй.",
+      options:[ {t:"Из прошлого {you} приходит новый враг", eff:1.0},
+                {t:"Тайна {you} наконец становится публичной", eff:1.3},
+                {t:"Любовный треугольник, которого никто не ждал", eff:1.1} ] },
+    { setup:"Фанаты хотят момент для финала. Чем закончить сезон?",
+      options:[ {t:"Свадьба, которую сорвут",       eff:1.2},
+                {t:"Предательство в самую последнюю секунду", eff:1.4},
+                {t:"{you} уходит от всего этого",     eff:1.0} ] },
+    { setup:"Выбери жанр, в который мир уйдёт дальше.",
+      options:[ {t:"Триллер-ограбление", eff:1.1},
+                {t:"Запретный роман",    eff:1.2},
+                {t:"Детектив с убийством",eff:1.3} ] },
+    { setup:"К истории присоединяется загадочный персонаж. Кто он для {you}?",
+      options:[ {t:"Давно потерянный родственник", eff:1.1},
+                {t:"Бывший(ая), который(ая) стал(а) знаменитым(ой)", eff:1.3},
+                {t:"Сталкер с планом", eff:1.4} ] },
+  ],
+
+  // Саботаж зала — анонимный твист
+  sabotageOptions: [
+    "Все тайно меняют сторону ещё до конца ночи.",
+    "Возвращается тот, кого все считали ушедшим.",
+    "Весь мир разом узнаёт главную тайну {you}.",
+    "Двух заклятых врагов заставляют объединиться — или потерять всё.",
+    "Кто-то делает предложение. Громко. Совершенно не тому.",
+    "Свет гаснет, а когда зажигается — одного человека нет.",
+  ],
+
+  // Проклятый кроссовер
+  crossoverOpens: [
+    "Реальность дала сбой. {world} перетёк прямо в {world2}, и {you} стоял(а) на самом шве.",
+    "Никто не просил {world} и {world2} столкнуться. Но место в первом ряду досталось {you}.",
+    "Два мира, одна ночь. {you} проснулся(ась) в {world}, но правила {world2} пришли вместе с ним.",
+  ],
+
+  // Гостевые появления
   guestOpens: [
-    "{you} pulled up to {host}'s world uninvited — and stole the entire scene.",
-    "{host} did NOT plan for {you} to show up. The fans did though.",
-    "One guest slot opened in {host}'s series. {you} kicked the door in.",
-    "{you} walked onto {host}'s set like they owned it. Honestly? They kind of did now.",
+    "{you} ворвался(ась) в мир {host} без приглашения — и украл(а) всю сцену.",
+    "{host} точно не планировал(а), что {you} появится. А вот фанаты — да.",
+    "В сериале {host} открылся один гостевой слот. {you} выбил(а) дверь ногой.",
+    "{you} вышел(ла) на площадку {host} как к себе домой. Честно? Теперь это почти так и есть.",
   ],
   guestBeats: [
-    "{host}'s cast didn't know whether to clap or run. {you} just smiled.",
-    "Half of {host}'s fans switched allegiance the second {you} spoke.",
-    "{host} tried to keep control of their own story. {you} had other plans.",
+    "Каст {host} не знал, аплодировать или бежать. {you} просто улыбнулся(ась).",
+    "Половина фанатов {host} сменила сторону, едва {you} заговорил(а).",
+    "{host} пытался(ась) сохранить контроль над своей же историей. У {you} были другие планы.",
   ],
 
-  // WRITERS' ROOM SABOTAGE — drop an anonymous chaos twist nobody can trace
-  sabotageOptions: [
-    "Everyone secretly swaps loyalties before the night is over.",
-    "A character everyone thought was gone walks back in.",
-    "The whole world finds out {you}'s biggest secret at once.",
-    "Two sworn enemies are forced to team up — or lose everything.",
-    "Someone proposes. Loudly. To absolutely the wrong person.",
-    "The lights cut, and when they return, one person is missing.",
+  creatorTaglines: [
+    " в эре злодея"," сразу после финала сезона"," самый шипперируемый каст недели",
+    " на дне и в тренде"," в шаге от КАНОНА"," переписывает весь свой лор",
+    " воюет с собственным кастом"," случайно завирусился вчера",
   ],
 
-  // CURSED CROSSOVER — collide your world with another
-  crossoverOpens: [
-    "Reality glitched. {world} bled straight into {world2}, and {you} was standing on the seam.",
-    "Nobody asked for {world} and {world2} to collide. {you} got the front-row seat anyway.",
-    "Two worlds, one night. {you} woke up in {world}, but the rules of {world2} came with.",
-  ],
-
-  // RETCON WAR — rewrite the past, flip a co-star into the villain
-  retconTitles: ["RETCON: {co} Was Always the Villain","RETCON: The Truth About {co}",
-                 "RETCON: {co}, Rewritten","RETCON: Everyone Forgot What {co} Did"],
+  // Реткон-война
+  retconTitles: ["РЕТКОН: {co} всегда был(а) злодеем","РЕТКОН: Правда о {co}",
+                 "РЕТКОН: {co}, переписан(а)","РЕТКОН: Все забыли, что сделал(а) {co}"],
   retconScenes: [
-    "Turns out the story was never what you thought. {co} set all of it up. You just hadn't noticed.",
-    "New canon, effective immediately: {co} was the problem the whole time. The receipts were always there.",
-    "You rewound the tape. Frame by frame, {co}'s smile gets worse. The fans see it now too.",
-    "One edit and the whole season flips. {co} isn't the friend anymore. {co} is the reason.",
+    "Оказывается, история была вовсе не такой, как ты думал(а). {co} всё это подстроил(а). Ты просто не замечал(а).",
+    "Новый канон, вступает в силу сейчас: проблемой всё это время был(а) {co}. Доказательства были всегда.",
+    "Ты отмотал(а) плёнку. Кадр за кадром улыбка {co} становится хуже. Теперь это видят и фанаты.",
+    "Один монтаж — и весь сезон переворачивается. {co} больше не друг. {co} — причина.",
   ],
   retconCliffs: [
-    "{co} just got the notification. The reply is going to be ugly.",
-    "Half the fandom switched sides in an hour. {co} has no idea yet.",
-    "Somewhere, {co} is screenshotting this for a comeback. Good luck.",
+    "{co} только что получил(а) уведомление. Ответ будет некрасивым.",
+    "Половина фандома сменила сторону за час. {co} ещё не в курсе.",
+    "Где-то {co} делает скриншот для ответки. Удачи.",
   ],
 
-  /* ---------------- NARRATIVE GRAMMAR ----------------
-     The engine composes episodes from these slot pools.
-     {you} = player, {co} = a co-star, {world} = world name */
-
-  // episode title fragments -> "The {a} {b}"
-  titleA: ["Last","Secret","Burning","Stolen","Forbidden","Midnight","Broken","Golden","Silent","Final","Hidden","Cruel","Sweet","Reckless"],
-  titleB: ["Confession","Betrayal","Crown","Kiss","Promise","Lie","Spotlight","Heist","Rumor","Choice","Dance","Truth","War","Goodbye"],
-
-  // cold opens by archetype
-  opens: {
-    star:    ["The whole {world} was watching when {you} walked in — and {you} loved it.",
-              "Cameras, whispers, flashbulbs. {you} owned the room before saying a word."],
-    rebel:   ["{you} wasn't supposed to be here tonight. That was exactly the point.",
-              "Rules were made to be broken, and {you} had a long list to get through."],
-    mystery: ["Nobody in {world} could say where {you} came from. The not-knowing made them lean closer.",
-              "{you} kept one secret behind every smile. Tonight, one of them slipped."],
-    lover:   ["Two people wanted {you} tonight. {you} could only ruin one of them.",
-              "{you} swore not to fall again. {world} had other plans."],
-    trickster:["{you} set the whole thing in motion just to see what would happen.",
-              "Chaos has a favorite child in {world}, and tonight it wore {you}'s face."],
-    underdog:["They laughed at {you} last season. Nobody was laughing now.",
-              "{you} had nothing left to lose — which, in {world}, made {you} dangerous."],
-  },
-
-  // mid beats keyed by relationship type of the co-star in scene
-  beats: {
-    ally:   ["{co} pulled {you} aside. “Whatever happens next, I'm in. Don't make me regret it.”",
-             "{co} covered for {you} when it counted. Now {co} wanted a favor back.",
-             "“We do this together or not at all,” {co} said, eyes locked on {you}."],
-    rival:  ["{co} smiled the way only an enemy can. “Enjoy tonight. It's the last one you'll win.”",
-             "{co} had been collecting {you}'s mistakes like trophies. Tonight {co} cashed one in.",
-             "Across the room, {co} raised a glass to {you} — a toast that felt like a threat."],
-    love:   ["{co} stepped close enough that {you} forgot the rest of {world} existed.",
-             "“Tell me to leave and I will,” {co} whispered. {you} didn't.",
-             "{co} left a note in {you}'s hand and disappeared before {you} could read it."],
-    secret: ["{co} knew. {you} could see it. The only question was the price of silence.",
-             "“I saw what you did,” {co} murmured. “And I haven't decided what to do about it.”",
-             "{co} slid a phone across the table. One photo. {you}'s whole world on a screen."],
-  },
-
-  // generic beats when no co-star yet
-  solo: ["A message lit up {you}'s phone from a number with no name.",
-         "The music dropped, the lights cut, and every head in {world} turned toward {you}.",
-         "{you} found the one door in {world} that was never supposed to open — slightly ajar.",
-         "An invitation arrived sealed in gold. No sender. Just {you}'s name."],
-
-  // cliffhangers
-  cliffs: ["Then the doors flew open — and the one person {you} swore was gone walked in.",
-           "{you}'s phone buzzed once. The message read: “They know.”",
-           "The lights came back up. Everyone was staring at {you}. Someone had said {you}'s name on stage.",
-           "And that's when {you} realized the whole night had been a setup — by someone {you} trusted.",
-           "A single word was waiting on the mirror in lipstick. {you}'s name, crossed out.",
-           "The screen went dark. When it lit again, {you} was trending across all of {world}."],
-
-  // the choices offered after each episode. {a}/{b} = co-star names if any
-  choiceSets: [
-    [ {t:"Confront them in front of everyone", k:"🔥", tag:"bold",   eff:{rival:+2, fans:1.4}},
-      {t:"Slip away and keep the secret",      k:"🌙", tag:"sly",    eff:{secret:+2, fans:1.0}},
-      {t:"Make it a public spectacle",         k:"🎭", tag:"chaos",  eff:{fans:1.7, rival:+1}} ],
-    [ {t:"Choose {a}",                         k:"💗", tag:"romance", eff:{love:+3, fans:1.3}},
-      {t:"Choose {b}",                         k:"💞", tag:"romance", eff:{love:+3, fans:1.3}},
-      {t:"Choose nobody. Choose the crown.",   k:"👑", tag:"power",   eff:{fans:1.5}} ],
-    [ {t:"Trust {a} with everything",          k:"🤝", tag:"loyal",   eff:{ally:+3, fans:1.1}},
-      {t:"Betray {a} before they betray you",  k:"🗡️", tag:"villain", eff:{rival:+3, fans:1.6}},
-      {t:"Disappear and let them wonder",      k:"💨", tag:"mystery", eff:{secret:+2, fans:1.2}} ],
-    [ {t:"Burn it all down",                   k:"💥", tag:"chaos",   eff:{fans:1.9, rival:+2}},
-      {t:"Play the long game",                 k:"♟️", tag:"power",   eff:{fans:1.2, ally:+1}},
-      {t:"Tell the truth, finally",            k:"🕊️", tag:"honest",  eff:{love:+1, fans:1.4}} ],
-  ],
-
-  // names/titles for the trending feed (fake but believable other "creators")
-  feedNames: ["@sterling","@yuki.exe","@thecrownless","@rhea_rising","@no.lastname","@kingoftuesday",
-              "@velvet","@d3vil_may","@ophelia.mp4","@lastsong","@apex.ari","@miss.midnight"],
-  feedTitles: ["The Last Confession","Betrayed at the Gala","She Chose Wrong","The Heist Goes Live",
-               "Crowned and Hunted","The Kiss That Ended a Season","Caught on Camera","The Double Cross",
-               "Midnight Coup","The Secret Twin","Burned Every Bridge","Trending by Accident"],
-
-  // fan comments shown under played episodes (social proof + dopamine)
-  fanNames: ["@stan_no1","@plottwist","@cryingrn","@team_{you}","@notyourbabe","@lorehead","@s1ep7",
-             "@midnight.cut","@unaliveme","@shipper.exe","@certified.fan","@4amthoughts","@itsgiving",
-             "@maincharacter","@thatwaswild","@rewatching","@sobbing","@chronically.online"],
-  fanComments: {
-    hype:  ["NObody is doing it like {you} 😭🔥","screaming this episode ate","{you} the blueprint fr","ok MAIN CHARACTER energy 💅","this is so cinematic i cant","{you} said let me end them ✋"],
-    ship:  ["{you} x {co} or i riot 😩","the TENSION between {you} and {co} hello??","i ship it im sorry","{co} look at {you} ONE more time challenge","they're literally endgame stop"],
-    shock: ["NO BECAUSE THE CLIFFHANGER 😱","i gasped on the train","not me yelling at my phone","WHO let this happen","plot armor who? {you} in DANGER"],
-    villain:["{you} the villain we deserve 😈","not {you} being iconic AND evil","ok but he's right tho","villain arc of the season fr","i fear {you} but i respect it"],
-  },
-
-  // Writers' Room — daily plot-twist polls (the retention loop)
-  writersPrompts: [
-    { setup:"The showrunner is deciding next season's first twist. Cast your vote.",
-      options:[ {t:"A new rival arrives from {you}'s past", eff:1.0},
-                {t:"{you}'s secret finally goes public",   eff:1.3},
-                {t:"A love triangle nobody saw coming",    eff:1.1} ] },
-    { setup:"The fans want a finale moment. What ends the season?",
-      options:[ {t:"A wedding that gets interrupted",      eff:1.2},
-                {t:"A betrayal at the very last second",   eff:1.4},
-                {t:"{you} walks away from it all",          eff:1.0} ] },
-    { setup:"Pick the genre the world leans into next.",
-      options:[ {t:"Heist thriller",  eff:1.1},
-                {t:"Forbidden romance",eff:1.2},
-                {t:"Murder mystery",   eff:1.3} ] },
-    { setup:"A mystery character is joining. Who are they to {you}?",
-      options:[ {t:"A long-lost sibling", eff:1.1},
-                {t:"An ex who got famous",eff:1.3},
-                {t:"A stalker with a plan",eff:1.4} ] },
-  ],
-
-  finaleTitles: ["SEASON FINALE: Everything Burns","SEASON FINALE: The Last Crown","SEASON FINALE: No One Walks Away","SEASON FINALE: The Truth, Finally"],
-
-  // CANON DUEL — two contradicting versions of the same event; the room decides
+  // Канон-дуэль — противоречащие версии события
   duelClaims: [
-    { topic:"the breakup",   a:"{you} ended it. Clean.",            b:"{co} walked first and never looked back." },
-    { topic:"the party",     a:"{you} was never even there.",       b:"{you} started the whole thing." },
-    { topic:"the secret",    a:"{co} told everyone.",               b:"{you} kept it. {co} is lying." },
-    { topic:"the win",       a:"{you} earned it fair.",             b:"{you} only won because {co} let it slide." },
-    { topic:"the betrayal",  a:"{co} sold {you} out.",              b:"{you} did it first." },
+    { topic:"расставание", a:"{you} закончил(а) всё. Чисто.",            b:"{co} ушёл(ла) первым(ой) и не оглянулся(ась)." },
+    { topic:"вечеринку",   a:"{you} там вообще не было.",                b:"{you} всё это и затеял(а)." },
+    { topic:"тайну",       a:"{co} разболтал(а) всем.",                  b:"{you} молчал(а). {co} врёт." },
+    { topic:"победу",      a:"{you} выиграл(а) честно.",                 b:"{you} победил(а) только потому, что {co} спустил(а) на тормозах." },
+    { topic:"предательство",a:"{co} сдал(а) {you}.",                     b:"{you} сделал(а) это первым(ой)." },
   ],
 
-  // LORE BUG BOUNTY — the showrunner's funniest continuity slips
+  // Охота на баги лора — забавные ляпы шоураннера
   loreBugs: [
-    "The showrunner brought back a character it killed off two episodes ago. No explanation.",
-    "{you} was in two places in the same scene. The fans noticed before you did.",
-    "An ally suddenly had a twin nobody mentioned. Classic.",
-    "A 'permanent' tattoo vanished by the next episode.",
-    "The showrunner forgot whose birthday party it was — and made it {you}'s twice.",
-    "Someone's name changed spelling mid-episode. The receipts are everywhere.",
+    "Шоураннер вернул персонажа, которого убил два эпизода назад. Без объяснений.",
+    "{you} оказался(ась) в двух местах в одной сцене. Фанаты заметили раньше тебя.",
+    "У союзника внезапно появился близнец, о котором никто не упоминал. Классика.",
+    "«Вечная» татуировка исчезла к следующему эпизоду.",
+    "Шоураннер забыл, чей это день рождения — и сделал его днём {you} дважды.",
+    "Имя кого-то посреди эпизода сменило написание. Доказательства повсюду.",
   ],
 };

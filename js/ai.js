@@ -25,18 +25,18 @@
     const world=state.worldName||"a vivid world";
     const cast=(state.cast||[]).map(c=>`${c.name} (${c.rel})`).join(", ")||"no co-stars yet";
     const recent=(state.episodes||[]).slice(-2).map(e=>e.title).join("; ")||"none";
-    return `You are the AI SHOWRUNNER of an addictive vertical drama series for Gen Z. Write the next 60-second episode.
-Protagonist: ${state.name} — archetype "${arch}". World: ${world}. Co-stars: ${cast}. Recent episodes: ${recent}.
+    return `Ты — ИИ-ШОУРАННЕР затягивающего вертикального драма-сериала для зумеров. Напиши следующий 60-секундный эпизод НА РУССКОМ ЯЗЫКЕ.
+Главный герой: ${state.name} — архетип "${arch}". Мир: ${world}. Со-актёры: ${cast}. Недавние эпизоды: ${recent}.
 
-VOICE (critical — Gen Z can smell "AI slop" instantly):
-- Write DRY, sharp and a little mean — like a witty shitposter screenwriter, NOT a romance novel.
-- Short punchy sentences. Concrete actions and cutting dialogue. Awkward beats. Subtext over melodrama.
-- BANNED clichés: "heart raced/pounded", "little did they know", "in that moment", "couldn't help but", "a mix of emotions". No purple prose, no piles of adjectives.
-- Make it funny-tense and specific. Real names, real consequences. PG-13 (romance/rivalry/secrets/betrayal, no explicit content).
+ГОЛОС (важно — зумеры мгновенно чуют "AI-слоп"):
+- Пиши СУХО, резко и слегка зло — как остроумный сценарист-шитпостер, а НЕ любовный роман.
+- Короткие хлёсткие фразы. Конкретные действия и колкие реплики. Неловкие паузы. Подтекст вместо мелодрамы.
+- ЗАПРЕЩЕНЫ клише: "сердце забилось", "и тут он понял", "в этот момент", "не мог не", "буря эмоций". Без воды и груды прилагательных.
+- Смешно-напряжённо и конкретно. Реальные имена, реальные последствия. PG-13 (романтика/соперничество/тайны/предательство, без откровенного контента).
 
-Return ONLY minified JSON, no prose, with this exact shape:
-{"title":"The X Y (max 4 words)","scenes":["sentence 1","sentence 2"],"cliff":"one shocking cliffhanger sentence","choices":[{"t":"choice text","tag":"bold|sly|chaos|romance|villain|power|loyal|honest","fans":1.4},{"t":"...","tag":"...","fans":1.0},{"t":"...","tag":"...","fans":1.7}]}
-Use the protagonist's and co-stars' names. Every choice must hurt or change something — no filler.`;
+Верни ТОЛЬКО минифицированный JSON на русском, без прозы, строго такой формы:
+{"title":"Короткое название (макс 4 слова)","scenes":["фраза 1","фраза 2"],"cliff":"одна шокирующая фраза-клиффхэнгер","choices":[{"t":"текст выбора","tag":"дерзко|хитро|хаос|романтика|злодей|власть|верность|честно","fans":1.4},{"t":"...","tag":"...","fans":1.0},{"t":"...","tag":"...","fans":1.7}]}
+Используй имена героя и со-актёров. Каждый выбор должен ранить или что-то менять — без филлеров.`;
   }
 
   async function generate(state){
@@ -64,7 +64,8 @@ Use the protagonist's and co-stars' names. Every choice must hurt or change some
   // map Claude JSON onto the engine's episode shape (+ art/season metadata)
   function normalize(j){
     const D=window.LORE_DATA, ART=window.LORE_ART;
-    const kmap={bold:"🔥",sly:"🌙",chaos:"🎭",romance:"💗",villain:"🗡️",power:"👑",loyal:"🤝",honest:"🕊️"};
+    const kmap={"дерзко":"🔥","хитро":"🌙","хаос":"🎭","романтика":"💗","злодей":"🗡️","власть":"👑","верность":"🤝","честно":"🕊️",
+                bold:"🔥",sly:"🌙",chaos:"🎭",romance:"💗",villain:"🗡️",power:"👑",loyal:"🤝",honest:"🕊️"};
     return {
       _ai:true,
       title:(j.title||"The Untitled Hour").slice(0,40),

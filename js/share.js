@@ -57,7 +57,7 @@
 
     // hook caption — engagement bait for the feed
     g.fillStyle="#ff4d6d"; g.font="800 38px Inter, sans-serif";
-    g.fillText("WHAT WOULD YOU DO?", 64, y+78);
+    g.fillText("А ТЫ БЫ КАК?", 64, y+78);
 
     // stats row
     g.font="700 46px Inter, sans-serif"; g.fillStyle="#fff";
@@ -68,7 +68,7 @@
 
     // creator handle
     g.fillStyle="#9a98b4"; g.font="600 38px Inter, sans-serif";
-    g.fillText("@"+((player&&player.name)||"you").toLowerCase().replace(/\s/g,"")+"  ·  made on LORE", 64, H-90);
+    g.fillText("@"+((player&&player.name)||"you").toLowerCase().replace(/\s/g,"")+"  ·  снято в LORE", 64, H-90);
 
     return c.toDataURL("image/png");
   }
@@ -80,11 +80,11 @@
       if(navigator.canShare){
         const blob=await (await fetch(data)).blob();
         const file=new File([blob], "lore-episode.png", {type:"image/png"});
-        if(navigator.canShare({files:[file]})){ await navigator.share({files:[file], title:"LORE", text:`${ep.title} — what would you do? 🎬 made on LORE`}); return "shared"; }
+        if(navigator.canShare({files:[file]})){ await navigator.share({files:[file], title:"LORE", text:`${ep.title} — а ты бы как? 🎬 снято в LORE`}); return "отправлен"; }
       }
     }catch(e){}
     const a=document.createElement("a"); a.href=data; a.download=`LORE-${(ep.title||"episode").replace(/\s+/g,"-")}.png`; a.click();
-    return "downloaded";
+    return "скачан";
   }
 
   window.LORE_SHARE = { exportCard, buildCard };

@@ -89,7 +89,7 @@
     const epInSeason = ((epNum-1) % 6) + 1;     // 6 episodes per season
     const season = Math.floor((epNum-1)/6) + 1;
     const isFinale = epInSeason === 6;
-    const title = isFinale ? rnd(D.finaleTitles) : `The ${rnd(D.titleA)} ${rnd(D.titleB)}`;
+    const title = isFinale ? rnd(D.finaleTitles) : rnd(D.episodeTitles);
 
     const palette = [arch.g[0], arch.g[1], arch.accent || world.g[1]];
     const art = window.LORE_ART
@@ -100,7 +100,7 @@
       num: epNum,
       season, epInSeason, isFinale,
       title,
-      badge: `S${season} · EP ${epInSeason}`,
+      badge: `С${season} · Серия ${epInSeason}`,
       world: world.name,
       worldId: world.id,
       palette,
@@ -134,11 +134,11 @@
 
     return {
       num: epNum, season, epInSeason, isFinale:false, isRetcon:true,
-      title, badge:`S${season} · RETCON`, world: world.name, worldId: world.id,
+      title, badge:`С${season} · РЕТКОН`, world: world.name, worldId: world.id,
       palette, grad: grad(arch.g), art,
       scenes:[ {t:f(rnd(D.retconScenes)), cls:""} ],
       cliff: f(rnd(D.retconCliffs)),
-      choices:[], coName: costar.name, chosen:"Rewrote the past",
+      choices:[], coName: costar.name, chosen:"предательство реткон",
       ts: Date.now(),
     };
   }
@@ -162,13 +162,13 @@
 
     const epNum = (state.episodes?.length||0)+1;
     const season= Math.floor((epNum-1)/6)+1;
-    const title = `CROSSOVER: ${world.name} × ${w2.name}`;
+    const title = `КРОССОВЕР: ${world.name} × ${w2.name}`;
     const palette = [arch.g[0], w2.g[1], arch.accent || "#a98bff"];
     const art = window.LORE_ART ? window.LORE_ART.forEpisode({title, world:w2.id, palette}) : grad(arch.g);
 
     return {
       num:epNum, season, epInSeason:((epNum-1)%6)+1, isCrossover:true,
-      title, badge:`S${season} · CROSSOVER`, world:`${world.name} × ${w2.name}`, worldId:w2.id,
+      title, badge:`С${season} · КРОССОВЕР`, world:`${world.name} × ${w2.name}`, worldId:w2.id,
       palette, grad:grad(arch.g), art,
       scenes, cliff: fill(rnd(D.cliffs), ctx), choices,
       coName: co?co.name:null, ts:Date.now(),
@@ -213,13 +213,13 @@
 
     const epNum=(state.episodes?.length||0)+1;
     const season=Math.floor((epNum-1)/6)+1;
-    const title=`GUEST: ${state.name||"You"} on ${creator.handle}`;
+    const title=`ГОСТЬ: ${state.name||"Ты"} у ${creator.handle}`;
     const palette=[arch.g[0], hostWorld.g[1], arch.accent||"#ff7eb6"];
     const art = window.LORE_ART ? window.LORE_ART.forEpisode({title, world:hostWorld.id, palette}) : grad(arch.g);
 
     return {
       num:epNum, season, epInSeason:((epNum-1)%6)+1, isGuest:true, host:creator.handle, hostFans:creator.fans,
-      title, badge:`GUEST · ${creator.handle}`, world:hostWorld.name, worldId:hostWorld.id,
+      title, badge:`ГОСТЬ · ${creator.handle}`, world:hostWorld.name, worldId:hostWorld.id,
       palette, grad:grad(arch.g), art,
       scenes, cliff: fill(rnd(D.cliffs), ctx), choices,
       coName: co?co.name:null, ts:Date.now(),
@@ -241,10 +241,10 @@
 
     const epNum = (state.episodes?.length||0)+1;
     const season = Math.floor((epNum-1)/6)+1;
-    const title = won ? "CANON DUEL: You Won" : "CANON DUEL: You Lost";
+    const title = won ? "КАНОН-ДУЭЛЬ: Победа" : "КАНОН-ДУЭЛЬ: Поражение";
     const verdict = won
-      ? `The room sided with you. Official record on "${claim.topic}": ${fill(claim.a)}`
-      : `The room sided with ${costar.name}. Official record on "${claim.topic}": ${fill(claim.b)}`;
+      ? `Зал встал на твою сторону. Официальная версия про ${claim.topic}: ${fill(claim.a)}`
+      : `Зал встал на сторону ${costar.name}. Официальная версия про ${claim.topic}: ${fill(claim.b)}`;
     const palette = won ? [arch.g[0], "#0d2a1a", "#19e6c1"] : [arch.g[0], "#2a0d12", "#ff6b3d"];
     const art = window.LORE_ART ? window.LORE_ART.forEpisode({title, world:world.id, palette}) : grad(arch.g);
 
@@ -254,12 +254,12 @@
 
     const ep = {
       num:epNum, season, epInSeason:((epNum-1)%6)+1, isDuel:true, won,
-      title, badge:`S${season} · DUEL`, world:world.name, worldId:world.id,
+      title, badge:`С${season} · ДУЭЛЬ`, world:world.name, worldId:world.id,
       palette, grad:grad(arch.g), art,
-      scenes:[ {t:`<span class="nm">${state.name}</span> and <span class="nm">${costar.name}</span> told two different stories about ${claim.topic}. So the room voted.`, cls:""},
+      scenes:[ {t:`<span class="nm">${state.name}</span> и <span class="nm">${costar.name}</span> рассказали две разные версии про ${claim.topic}. Поэтому зал проголосовал.`, cls:""},
                {t:verdict, cls:"dir"} ],
-      cliff: won ? `${costar.name} is fuming. A rematch is coming.` : `You got out-canoned. Everyone saw it.`,
-      choices:[], coName:costar.name, chosen:(won?"Won the duel":"Lost the duel"),
+      cliff: won ? `${costar.name} в ярости. Реванш не за горами.` : `Тебя переканонили. И все это видели.`,
+      choices:[], coName:costar.name, chosen:(won?"Выиграл(а) дуэль":"Проиграл(а) дуэль"),
       ts:Date.now(),
     };
     return { ep, won, yourPct, theirPct:100-yourPct, costarName:costar.name };
@@ -278,7 +278,7 @@
     const pool = [];
     const tones = ["hype","hype","shock"];
     if(co) tones.push("ship");
-    if(ep.chosen && /betray|villain|burn/i.test(ep.chosen)) tones.push("villain");
+    if(ep.chosen && /betray|villain|burn|злоде|преда|сжечь/i.test(ep.chosen)) tones.push("villain");
     if(score && score.viral) tones.push("hype","shock");
     const n = Math.min(4, 2 + Math.floor(Math.random()*3));
     const used = new Set();
@@ -354,13 +354,13 @@
     const co = acc.length ? rnd(acc) : null;
     const missed = co
       ? rnd([
-          `While you were gone, ${co.name} made a move. The fans are losing it.`,
-          `${co.name} dropped a clip about you. ${rint(2,40)}k views and climbing.`,
-          `A rumor about you and ${co.name} is trending across ${state.worldName}.`,
+          `Пока тебя не было, ${co.name} сделал(а) ход. Фанаты в шоке.`,
+          `${co.name} выложил(а) клип про тебя. ${rint(2,40)}к просмотров и растёт.`,
+          `Слух про тебя и ${co.name} в тренде по всему ${state.worldName}.`,
         ])
       : rnd([
-          `Your last cliffhanger blew up overnight. New fans are waiting.`,
-          `Someone re-cut your episode. It's spreading beyond the app.`,
+          `Твой последний клиффхэнгер взорвался за ночь. Новые фанаты ждут.`,
+          `Кто-то перемонтировал твой эпизод. Расходится за пределами приложения.`,
         ]);
     return { drift, missed, hrs };
   }

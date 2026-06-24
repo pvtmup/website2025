@@ -78,7 +78,7 @@
 
   function generatingThenHome(){
     screen.innerHTML = UI.viewGenerating(draft.name);
-    const lines = ["casting your world…","writing your pilot…","placing the cameras…","cueing the cliffhanger…"];
+    const lines = ["подбираем твой мир…","пишем твой пилот…","расставляем камеры…","готовим клиффхэнгер…"];
     let i=0; const el=()=>document.getElementById("genLine");
     const iv = setInterval(()=>{ i++; if(el()) el().textContent = lines[i%lines.length]; }, 520);
     setTimeout(()=>{ clearInterval(iv); commitOnboard(); route="home"; render(); }, 2300);
@@ -94,7 +94,7 @@
     if(AI && AI.enabled()){
       generating = true;
       const btn = document.querySelector('[data-act="next-ep"]');
-      if(btn){ btn.disabled=true; btn.textContent="✨ The AI showrunner is writing…"; }
+      if(btn){ btn.disabled=true; btn.textContent="✨ ИИ-шоураннер пишет…"; }
       let ep = null;
       try{ ep = await AI.tryGenerate(st); }catch(e){}
       generating = false;
@@ -111,7 +111,7 @@
   function consumeTwist(ep){
     const st=S.state;
     if(st.pendingTwist){
-      ep.scenes.unshift({ t:`The room's anonymous twist lands: <span class="nm">${UI.esc(st.pendingTwist)}</span>`, cls:"dir" });
+      ep.scenes.unshift({ t:`Анонимный твист зала прилетает: <span class="nm">${UI.esc(st.pendingTwist)}</span>`, cls:"dir" });
       st.pendingTwist=null;
     }
   }
@@ -124,7 +124,7 @@
     consumeTwist(st.activeEp);
     S.unlock("crossover"); S.save(); render();
     setTimeout(()=>{ const e=document.getElementById("ep-"+st.activeEp.num); if(e) e.scrollIntoView({behavior:"smooth",block:"start"}); }, 60);
-    UI.toast(`<span class="tt">🌀 Worlds colliding</span> · ${UI.esc(st.activeEp.world)}`);
+    UI.toast(`<span class="tt">🌀 Миры столкнулись</span> · ${UI.esc(st.activeEp.world)}`);
     checkAchievements(null,null);
   }
 
@@ -137,20 +137,20 @@
     S.unlock("gueststar"); S.save();
     route="home"; render();
     setTimeout(()=>{ const el=document.getElementById("ep-"+st.activeEp.num); if(el) el.scrollIntoView({behavior:"smooth",block:"start"}); }, 80);
-    UI.toast(`<span class="tt">🎬 Guesting on ${UI.esc(creator.handle)}</span> · their fans are watching — make it count`);
+    UI.toast(`<span class="tt">🎬 Ты в гостях у ${UI.esc(creator.handle)}</span> · их фанаты смотрят — не подведи`);
     checkAchievements(null,null);
   }
 
   /* ---------------- Writers' Room Sabotage ---------------- */
   function injectSabotage(i){
     const st=S.state; const today=new Date().toDateString();
-    if(st.sabotageDay===today){ sfx("error"); UI.toast("You've already sabotaged the room today."); return; }
+    if(st.sabotageDay===today){ sfx("error"); UI.toast("Ты уже саботировал(а) зал сегодня."); return; }
     const txt=(D.sabotageOptions[i]||"").replace(/\{you\}/g, st.name||"you");
     st.sabotageDay=today; st.pendingTwist=txt;
     const bonus=Math.round(50+st.fans*0.01);
     st.fans+=bonus; S.unlock("saboteur"); S.save();
     sfx("pick"); render();
-    UI.toast(`<span class="tt">🕵️ Twist injected</span> +${S.fmt(bonus)} chaos · nobody knows it was you`);
+    UI.toast(`<span class="tt">🕵️ Твист вброшен</span> +${S.fmt(bonus)} хаоса · никто не знает, что это ты`);
     checkAchievements(null,null);
   }
 
@@ -181,12 +181,12 @@
     setTimeout(()=>{ const e=document.getElementById("ep-"+ep.num); if(e) e.scrollIntoView({behavior:"smooth",block:"center"}); }, 80);
 
     // outcome toast
-    UI.toast(`<span class="tt">+${S.fmt(score.newFans)} fans</span> · ${S.fmt(score.views)} views${score.viral?' · 🚀 VIRAL':''}`);
+    UI.toast(`<span class="tt">+${S.fmt(score.newFans)} фанатов</span> · ${S.fmt(score.views)} просмотров${score.viral?' · 🚀 ВИРАЛ':''}`);
 
     // tier-up celebration
     const newTier = E.tierForFans(st.fans);
     if(newTier.id>prevTier){
-      setTimeout(()=>{ sfx("level"); UI.toast(`<span class="tt">LEVEL UP →</span> You are now <b>${UI.esc(newTier.name)}</b>`); }, 1400);
+      setTimeout(()=>{ sfx("level"); UI.toast(`<span class="tt">НОВЫЙ УРОВЕНЬ →</span> Теперь ты <b>${UI.esc(newTier.name)}</b>`); }, 1400);
     }
     checkAchievements(choice, score);
   }
@@ -212,7 +212,7 @@
     if(fresh.length){
       let k=0;
       const show=()=>{ if(k>=fresh.length) return; const a=fresh[k++];
-        setTimeout(()=>{ sfx("achieve"); UI.toast(`<span class="tt">${a.icon} Achievement —</span> ${UI.esc(a.t)}`); show(); }, 2300); };
+        setTimeout(()=>{ sfx("achieve"); UI.toast(`<span class="tt">${a.icon} Достижение —</span> ${UI.esc(a.t)}`); show(); }, 2300); };
       show();
     }
   }
@@ -221,13 +221,13 @@
   function addCostar(){
     const inp = document.getElementById("costarName");
     const name = (inp?.value||"").trim();
-    if(!name){ sfx("error"); UI.toast("Give your co-star a name first."); inp?.focus(); return; }
+    if(!name){ sfx("error"); UI.toast("Сначала впиши имя со-актёра."); inp?.focus(); return; }
     const rel = castRel;
     const c = S.addCostar(name, rel, "pending");   // pending until they accept (double opt-in)
     castRel = "ally";
     sfx("pick");
     render();
-    UI.toast(`<span class="tt">${UI.esc(name)} cast</span> as your ${UI.esc(D.relationships[rel]?.label||"")} — now send the invite.`);
+    UI.toast(`<span class="tt">${UI.esc(name)} в касте</span> как твой(я) ${UI.esc(D.relationships[rel]?.label||"")} — теперь отправь инвайт.`);
     setTimeout(()=>shareInvite(c.id), 400);
   }
 
@@ -238,27 +238,27 @@
   }
   async function shareInvite(id){
     const st=S.state; const c=st.cast.find(x=>x.id===id); if(!c) return;
-    const url=inviteUrl(c, st.name||"A friend", c.rel);
-    const text=`I cast you as my ${D.relationships[c.rel]?.label||"co-star"} in my LORE series 🎬 Accept your role:`;
+    const url=inviteUrl(c, st.name||"Друг", c.rel);
+    const text=`Беру тебя на роль «${D.relationships[c.rel]?.label||"со-актёр"}» в мой сериал LORE 🎬 Прими роль:`;
     sfx("whoosh");
     try{
-      if(navigator.share){ await navigator.share({title:"LORE", text, url}); UI.toast(`<span class="tt">Invite sent</span> · they accept their role, then they're in`); return; }
+      if(navigator.share){ await navigator.share({title:"LORE", text, url}); UI.toast(`<span class="tt">Инвайт отправлен</span> · примут роль — и они в касте`); return; }
     }catch(e){ if(e&&e.name==="AbortError") return; }
-    try{ await navigator.clipboard.writeText(url); UI.toast(`<span class="tt">Invite link copied</span> · send it to ${UI.esc(c.name)}`); }
-    catch(e){ UI.toast(`Invite link: ${UI.esc(url)}`); }
+    try{ await navigator.clipboard.writeText(url); UI.toast(`<span class="tt">Ссылка-инвайт скопирована</span> · отправь её ${UI.esc(c.name)}`); }
+    catch(e){ UI.toast(`Ссылка-инвайт: ${UI.esc(url)}`); }
   }
   function acceptCostar(id){
     const c=S.acceptCostar(id); if(!c) return;
     sfx("fans"); S.unlock("caster"); render();
-    UI.toast(`<span class="tt">${UI.esc(c.name)} joined the cast</span> · they're in your story now`);
+    UI.toast(`<span class="tt">${UI.esc(c.name)} в касте</span> · теперь он(а) в твоей истории`);
     checkAchievements(null,null);
   }
 
   /* ---------------- Canon Duel ---------------- */
   function startDuel(id){
     const st=S.state; const c=st.cast.find(x=>x.id===id); if(!c) return;
-    if(c.status==="pending"){ sfx("error"); UI.toast("They have to accept their role before you can duel."); return; }
-    if(!confirm(`Take your dispute with ${c.name} to the room? They vote who's canon. Win or lose, it sticks.`)) return;
+    if(c.status==="pending"){ sfx("error"); UI.toast("Сначала пусть примут роль — потом дуэль."); return; }
+    if(!confirm(`Вынести спор с ${c.name} в зал? Они голосуют, чья версия — канон. Победа или поражение — это останется.`)) return;
     const res=E.resolveDuel(st, c);
     const score=E.scoreEpisode(st,{eff:{fans: res.won?1.7:1.0}});
     const fanDelta = res.won ? score.newFans : -Math.round(score.newFans*0.4);
@@ -271,8 +271,8 @@
     route="home"; render();
     setTimeout(()=>{ const el=document.getElementById("ep-"+ep.num); if(el) el.scrollIntoView({behavior:"smooth",block:"center"}); }, 100);
     UI.toast(res.won
-      ? `<span class="tt">⚔️ You won the duel ${res.yourPct}–${res.theirPct}</span> · your version is canon now`
-      : `<span class="tt">⚔️ You lost ${res.theirPct}–${res.yourPct}</span> · ${UI.esc(res.costarName)} wrote the record`);
+      ? `<span class="tt">⚔️ Ты выиграл(а) дуэль ${res.yourPct}–${res.theirPct}</span> · теперь канон — твоя версия`
+      : `<span class="tt">⚔️ Ты проиграл(а) ${res.theirPct}–${res.yourPct}</span> · ${UI.esc(res.costarName)} вписал(а) свою версию`);
     checkAchievements(null, score);
   }
 
@@ -334,7 +334,7 @@
       if(a==="start"){ onbStep="name"; render(); }
       else if(a==="name-next"){
         const n=document.getElementById("nameInput").value.trim();
-        if(!n){ UI.toast("Your character needs a name."); return; }
+        if(!n){ UI.toast("Персонажу нужно имя."); return; }
         draft.name=n; draft.vibe=document.getElementById("vibeInput").value.trim();
         onbStep="arch"; render();
       }
@@ -348,7 +348,7 @@
       else if(a==="bug-bounty"){ bugBounty(); }
       else if(a==="go-home"){ route="home"; render(); }
       else if(a==="open-plus"){ sfx("pick"); screen.insertAdjacentHTML("beforeend", UI.plusSheet()); }
-      else if(a==="buy-plus"){ S.state.plus=true; S.save(); closeSheet(); render(); sfx("achieve"); UI.toast(`<span class="tt">LORE+ active</span> · welcome to the spotlight`); }
+      else if(a==="buy-plus"){ S.state.plus=true; S.save(); closeSheet(); render(); sfx("achieve"); UI.toast(`<span class="tt">LORE+ активен</span> · добро пожаловать под софиты`); }
       else if(a==="open-settings"){ sfx("pick"); screen.insertAdjacentHTML("beforeend", UI.settingsSheet()); }
       else if(a==="close-sheet"){ sfx("tap"); closeSheet(); }
       else if(a==="accept-invite"){
@@ -356,38 +356,38 @@
         if(S.state.onboarded){
           S.addCostar(inv.from, inv.as, "active"); S.unlock("caster");
           route="cast"; render();
-          UI.toast(`<span class="tt">You're in ${UI.esc(inv.from)}'s story</span> · and they're in yours`);
+          UI.toast(`<span class="tt">Ты в истории ${UI.esc(inv.from)}</span> · а они — в твоей`);
           checkAchievements(null,null);
         } else {
           pendingInviter=inv; onbStep="name"; render();
-          UI.toast(`<span class="tt">First, create your character →</span>`);
+          UI.toast(`<span class="tt">Сначала создай своего персонажа →</span>`);
         }
       }
       else if(a==="decline-invite"){ sfx("tap"); incomingInvite=null; closeSheet(); }
       else if(a==="toggle-sound"){ const on=!(window.LORE_AUDIO&&window.LORE_AUDIO.isOn()); window.LORE_AUDIO&&window.LORE_AUDIO.setOn(on); act.classList.toggle("on",on); }
       else if(a==="save-key"){
         const v=document.getElementById("aiKey").value.trim();
-        if(v && !/^•+$/.test(v)){ AI.setKey(v); UI.toast(`<span class="tt">Key saved</span> · stored on this device only`); }
-        else UI.toast("Paste your sk-ant- key first.");
+        if(v && !/^•+$/.test(v)){ AI.setKey(v); UI.toast(`<span class="tt">Ключ сохранён</span> · только на этом устройстве`); }
+        else UI.toast("Сначала вставь ключ sk-ant-…");
       }
       else if(a==="test-key"){
         const v=document.getElementById("aiKey").value.trim();
         if(v && !/^•+$/.test(v)) AI.setKey(v);
-        UI.toast("Testing connection…");
+        UI.toast("Проверяем соединение…");
         AI.test().then(r=>{ sfx(r.ok?"achieve":"error"); UI.toast(`<span class="tt">${r.ok?'✓ ':'✕ '}</span>${UI.esc(r.msg)}`); });
       }
       else if(a==="toggle-ai"){
-        if(!AI.hasKey()){ sfx("error"); UI.toast("Add an API key first to use Live AI."); return; }
+        if(!AI.hasKey()){ sfx("error"); UI.toast("Сначала добавь API-ключ для живого ИИ."); return; }
         const on=!AI.isOn(); AI.setOn(on); act.classList.toggle("on",on);
-        const st=document.getElementById("aiState"); if(st) st.textContent=(on?'On':'Off')+' · model '+AI.model();
-        sfx("pick"); UI.toast(on?`<span class="tt">✨ Live AI on</span> · Claude writes your episodes`:"Live AI off · using built-in showrunner");
+        const st=document.getElementById("aiState"); if(st) st.textContent=(on?'Вкл':'Выкл')+' · модель '+AI.model();
+        sfx("pick"); UI.toast(on?`<span class="tt">✨ Живой ИИ включён</span> · эпизоды пишет Claude`:"Живой ИИ выключен · встроенный режиссёр");
       }
       else if(a==="install"){
         if(installPrompt){ installPrompt.prompt(); installPrompt=null; }
-        else UI.toast("Use your browser menu → ‘Add to Home Screen’.");
+        else UI.toast("Меню браузера → Добавить на экран «Домой».");
       }
       else if(a==="reset"){
-        if(confirm("Start a new life? Your current series will be gone forever.")){
+        if(confirm("Начать новую жизнь? Твой текущий сериал исчезнет навсегда.")){
           S.reset(); closeSheet(); onbStep=null; route="home"; draft={name:"",vibe:"",archetype:null,world:null}; render();
         }
       }
@@ -404,7 +404,7 @@
     const bonus = Math.round((40 + st.fans*0.02*(wt.options[idx]?.eff||1)) * weight);
     st.fans += bonus; S.save();
     sfx("fans"); render();
-    UI.toast(`<span class="tt">Vote ×${weight} counted</span> +${S.fmt(bonus)} influence · the room is writing it in`);
+    UI.toast(`<span class="tt">Голос ×${weight} засчитан</span> +${S.fmt(bonus)} влияния · зал вписывает это в сюжет`);
   }
 
   /* ---------------- RETCON WAR ---------------- */
@@ -415,8 +415,8 @@
     let target = st.cast.find(c=>c.name===src.coName)
               || st.cast.find(c=>c.rel!=="rival")
               || st.cast[0];
-    if(!target){ sfx("error"); UI.toast("Retcon needs a co-star — cast a friend first."); route="cast"; render(); return; }
-    if(!confirm(`Rewrite the past and turn ${target.name} into the villain? This can't be undone — they'll know.`)) return;
+    if(!target){ sfx("error"); UI.toast("Для реткона нужен со-актёр — сначала позови друга."); route="cast"; render(); return; }
+    if(!confirm(`Переписать прошлое и сделать ${target.name} злодеем? Это необратимо — они узнают.`)) return;
 
     const ep = E.generateRetcon(st, target);
     const score = E.scoreEpisode(st, {eff:{fans:1.9}});
@@ -431,17 +431,17 @@
     sfx(score.viral?"viral":"achieve");
     render();
     setTimeout(()=>{ const el=document.getElementById("ep-"+ep.num); if(el) el.scrollIntoView({behavior:"smooth",block:"center"}); }, 80);
-    UI.toast(`<span class="tt">↺ History rewritten</span> · ${UI.esc(target.name)} is the villain now · ${S.fmt(score.views)} views`);
+    UI.toast(`<span class="tt">↺ Прошлое переписано</span> · теперь злодей — ${UI.esc(target.name)} · ${S.fmt(score.views)} просмотров`);
     checkAchievements(null, score);
   }
 
   /* ---------------- share ---------------- */
   async function shareEpisode(num){
     const ep=(S.state.episodes||[]).find(e=>e.num===num); if(!ep||!SH) return;
-    sfx("whoosh"); UI.toast("Rendering your clip…");
+    sfx("whoosh"); UI.toast("Рендерим твой клип…");
     try{ const how=await SH.exportCard(ep, S.state);
-      UI.toast(`<span class="tt">Clip ${how}</span> · post it, pull in new fans`);
-    }catch(e){ sfx("error"); UI.toast("Couldn't render the clip here."); }
+      UI.toast(`<span class="tt">Клип ${how}</span> · выложи — приведёшь новых фанатов`);
+    }catch(e){ sfx("error"); UI.toast("Не получилось отрендерить клип здесь."); }
   }
 
   // clicking a sheet's inner content shouldn't close it
