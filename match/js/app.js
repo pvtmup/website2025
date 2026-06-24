@@ -30,11 +30,19 @@
     overlay.classList.remove("hidden"); count(document.getElementById("cnt"),score);
   }
   function home(){
+    const crew=["🐶","🐱","🐸","🦊","🐼","🐵"].map((e,i)=>`<span style="--i:${i}">${e}</span>`).join("");
     overlay.innerHTML=`<div class="scr home">
-      <div class="logo">МЭТЧ</div><div class="slogan">три в ряд · 20 ходов</div>
-      <div class="hint">Меняй местами соседние камни, собирай 3+ в ряд. 4 — взрыв линии, 5 — очистка цвета. Лови каскады!</div>
-      <button class="btn play" data-a="play">▶ Играть</button>
-      <div class="bestrow">🏆 рекорд: <b>${best()}</b></div>
+      <div class="floaters" aria-hidden="true">${crew}</div>
+      <div class="hero">
+        <div class="logo">МЭТЧ</div>
+        <div class="slogan">три в ряд</div>
+        <div class="crew">${crew}</div>
+      </div>
+      <div class="hint">Меняй местами соседних зверят, собирай <b>3+ в ряд</b>.<br>4 — взрыв линии, 5 — очистка цвета. Лови каскады!</div>
+      <div class="cta">
+        <button class="btn play" data-a="play">▶ Играть</button>
+        <div class="bestrow">🏆 рекорд: <b>${best()}</b></div>
+      </div>
     </div>`;
     overlay.classList.remove("hidden");
   }

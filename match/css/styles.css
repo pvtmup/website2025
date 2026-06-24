@@ -16,8 +16,18 @@ body{font-family:Inter,system-ui,sans-serif;background:radial-gradient(120% 80% 
 #mute{position:absolute;top:12px;right:12px;z-index:6;width:40px;height:40px;border-radius:12px;border:1px solid var(--line);background:var(--card);color:#fff;font-size:18px;cursor:pointer}
 #overlay{position:absolute;inset:0;z-index:5}
 #overlay.hidden{display:none}
-.scr{height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;padding:30px;text-align:center;background:radial-gradient(120% 70% at 50% 0%,rgba(27,19,48,.7),rgba(11,11,22,.95));animation:in .3s}
+.scr{height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;padding:30px;text-align:center;background:radial-gradient(120% 70% at 50% 0%,rgba(27,19,48,.7),rgba(11,11,22,.95));animation:in .3s;position:relative;overflow:hidden}
+.scr.home{justify-content:space-between;padding:48px 26px}
 @keyframes in{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+.hero{display:flex;flex-direction:column;align-items:center;gap:8px;position:relative;z-index:1}
+.crew{display:flex;gap:6px;font-size:30px;margin-top:10px}
+.crew span{display:inline-block;animation:bob 1.8s ease-in-out infinite;animation-delay:calc(var(--i)*.12s)}
+@keyframes bob{0%,100%{transform:translateY(0) rotate(0)}50%{transform:translateY(-9px) rotate(6deg)}}
+.cta{display:flex;flex-direction:column;align-items:center;gap:12px;position:relative;z-index:1;width:100%}
+/* фон: дрейфующие зверята */
+.floaters{position:absolute;inset:0;z-index:0;pointer-events:none}
+.floaters span{position:absolute;bottom:-50px;font-size:34px;opacity:.12;animation:rise linear infinite;left:calc(8% + var(--i)*16%);animation-duration:calc(12s + var(--i)*2s);animation-delay:calc(var(--i)*-3s)}
+@keyframes rise{to{transform:translateY(-118vh) rotate(160deg)}}
 .logo{font-size:80px;font-weight:900;background:linear-gradient(120deg,#fff,#ffd66b 55%,#19e6c1);-webkit-background-clip:text;background-clip:text;color:transparent}
 .slogan{color:var(--muted);font-weight:800;letter-spacing:.12em;text-transform:uppercase;font-size:13px}
 .hint{color:var(--muted);font-size:14px;line-height:1.5;max-width:300px}
