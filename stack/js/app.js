@@ -131,6 +131,13 @@
     setScreen(UI.screenSeason());
     UI.toast(`Награда забрана${rew.skin?": скин "+SK.byId(rew.skin).name:" +"+rew.coins+"🪙"}`);
   }
+  async function buyPassStars(){
+    const P=window.STACK_PAY; if(!P) return;
+    const r=await P.buy("pass");
+    if(r==="paid"){ SE.ensure(S.s); S.s.season.owner=true; S.save(); A.fx.coin(); if(TG)TG.haptic("success"); setScreen(UI.screenSeason()); UI.toast("🎟️ Пасс куплен за Stars!"); }
+    else if(r==="off"){ UI.toast("Покупки за Stars скоро будут включены"); }
+    else if(r!=="cancelled"){ A.fx.over(); UI.toast("Оплата не прошла"); }
+  }
   function buyPass(){
     if(S.s.coins>=SE.PASS_COST){ S.addCoins(-SE.PASS_COST); SE.ensure(S.s); S.s.season.owner=true; S.save(); A.fx.coin(); if(TG)TG.haptic("success"); setScreen(UI.screenSeason()); UI.toast("🎟️ Премиум-пасс активирован!"); }
     else { A.fx.over(); UI.toast("Не хватает монет на пасс 🪙"); }
@@ -155,6 +162,7 @@
     const a=el.dataset.act; A.fx.tap();
     if(a==="open-season"){ openSub(UI.screenSeason()); return; }
     if(a==="buy-pass"){ buyPass(); return; }
+    if(a==="buy-pass-stars"){ buyPassStars(); return; }
     if(a==="claim-reward"){
       const k=UI.dailyKeyNow();
       if(S.s.claimedRewardDay!==k){ S.touchDay(); const r=rewardFor(S.s.streak); S.s.claimedRewardDay=k; S.addCoins(r); S.save(); A.fx.coin(); if(TG)TG.haptic("success"); home(); UI.toast(`🎁 Ежедневная награда: <b>+${r} 🪙</b> · стрик ${S.s.streak}🔥`); }

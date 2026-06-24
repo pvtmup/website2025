@@ -119,9 +119,11 @@
         <div class="trk-col"><div class="trk-cap gold">pass</div>${prem}</div>
       </div>`;
     }).join("");
+    const starsBtn = (!st.season.owner && window.STACK_PAY && window.STACK_PAY.available())
+      ? `<div style="height:8px"></div><button class="big-btn" data-act="buy-pass-stars">★ Купить за ${window.STACK_PAY.PRODUCTS.pass.stars} Stars</button>` : "";
     const passBox = st.season.owner
       ? `<div class="pass-on">🎟️ Премиум-пасс активен в этом сезоне</div>`
-      : `<button class="big-btn gold" data-act="buy-pass">🎟️ Активировать пасс — ${SE.PASS_COST} 🪙<span class="hint">открывает все премиум-награды сезона + эксклюзивные скины</span></button>`;
+      : `<button class="big-btn gold" data-act="buy-pass">🎟️ Активировать пасс — ${SE.PASS_COST} 🪙<span class="hint">открывает все премиум-награды сезона + эксклюзивные скины</span></button>${starsBtn}`;
     return `
       <div class="scr">
         ${bar(c.emoji+" "+esc(c.name))}
