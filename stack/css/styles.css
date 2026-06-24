@@ -150,7 +150,8 @@ body{font-family:Inter,system-ui,sans-serif;background:radial-gradient(120% 80% 
   border-radius:24px;padding:24px 20px;box-shadow:0 20px 50px rgba(0,0,0,.45)}
 .newbest{color:var(--gold);font-weight:900;letter-spacing:.08em;margin-bottom:6px}
 .over-score{font-size:92px;font-weight:900;line-height:1}
-.over-sub{color:var(--muted);font-weight:600;margin-bottom:16px}
+.over-sub{color:var(--muted);font-weight:600;margin-bottom:6px}
+.over-pct{color:var(--accent2);font-weight:800;font-size:13px;margin-bottom:14px}
 .over-stats{display:flex;justify-content:space-around;margin:8px 0 16px}
 .over-stats div{display:flex;flex-direction:column}
 .over-stats b{font-size:24px;font-weight:900}

@@ -27,13 +27,17 @@
     }
     window.addEventListener("resize", ()=>{ resize(); draw(); });
 
-    function speed(){ return (0.42 + Math.min(score*0.028, 1.5)) * W; } // px/sec
+    function speed(){
+      const base = (0.42 + Math.min(score*0.028, 1.5)) * W;       // растёт с высотой
+      return base * (1 + 0.12*Math.sin(score*0.55));               // волна ритма
+    }
 
     function spawn(prevW){
       const side = rng() < 0.5 ? 0 : 1;
       const w = prevW;
-      const gold = placed.length>0 && (placed.length % 5 === 0); // периодически — золотой бонус-блок
-      cur = { x: side? (W-w) : 0, w, dir: side? -1: 1, ci: placed.length, gold };
+      const gold = placed.length>0 && (placed.length % 5 === 0); // бонус-блок
+      const fast = !gold && placed.length>3 && rng()<0.16;       // быстрый блок (вызов), честно по сиду
+      cur = { x: side? (W-w) : 0, w, dir: side? -1: 1, ci: placed.length, gold, fast };
     }
 
     function start(seed){
@@ -103,7 +107,7 @@
       let dt = (ts-last)/1000; last = ts; if(dt>0.05) dt=0.05;
       // move current
       if(cur){
-        cur.x += cur.dir * speed() * dt;
+        cur.x += cur.dir * speed() * (cur.fast?1.5:1) * dt;
         if(cur.x < 0){ cur.x = 0; cur.dir = 1; }
         if(cur.x + cur.w > W){ cur.x = W - cur.w; cur.dir = -1; }
       }
@@ -150,8 +154,12 @@
         ctx.strokeRect(top.x, baseY, top.w, blockH-2); ctx.setLineDash([]); }
       // slices
       slices.forEach(s=>{ ctx.globalAlpha=Math.max(0,s.a); block(s.x,s.y,s.w,blockH-2,SKINS.colorFor(skin,s.ci),s.gold); ctx.globalAlpha=1; });
-      // current moving block
-      if(cur) block(cur.x, baseY, cur.w, blockH-2, SKINS.colorFor(skin, cur.ci), cur.gold);
+      // current moving block (+ телеграф быстрого блока)
+      if(cur){
+        block(cur.x, baseY, cur.w, blockH-2, SKINS.colorFor(skin, cur.ci), cur.gold);
+        if(cur.fast){ ctx.fillStyle="#19e6c1"; ctx.fillRect(cur.x, baseY, cur.w, 4);
+          ctx.fillRect(cur.x, baseY+blockH-6, cur.w, 4); }
+      }
       // particles
       parts.forEach(p=>{ ctx.globalAlpha=Math.max(0,p.life); ctx.fillStyle=p.color; ctx.fillRect(p.x-3,p.y-3,6,6); });
       ctx.globalAlpha=1;

@@ -157,8 +157,9 @@
       <div class="scr over">
         <div class="over-card">
           ${isBest?'<div class="newbest">🏆 НОВЫЙ РЕКОРД</div>':''}
-          <div class="over-score">${o.score}</div>
+          <div class="over-score" data-to="${o.score}">${o.score}</div>
           <div class="over-sub">${o.mode==="daily"?"дневной челлендж":(o.mode==="duel"?"дуэль":"высота башни")}</div>
+          ${o.score>=5?`<div class="over-pct">🔥 лучше ${Math.min(99,Math.max(5,Math.round(100*(1-1/(1+o.score/12)))))}% игроков</div>`:''}
           <div class="over-stats">
             <div><b>${fmt(st.best)}</b><span>рекорд</span></div>
             <div><b>+${o.coins}</b><span>🪙 монет</span></div>

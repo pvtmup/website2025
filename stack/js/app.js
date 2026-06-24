@@ -81,6 +81,7 @@
     S.save();
     if(best){ setTimeout(()=>A.fx.win(),300); if(TG) TG.haptic("success"); }
     setScreen(UI.screenOver({ score, best, coins:earned, maxCombo, mode, target: (mode==="duel"&&duel)?duel.score:null }));
+    countUp(overlay.querySelector(".over-score"), score);
     // тосты о заданиях/целях поверх
     let delay=400;
     doneQ.forEach(q=>{ const d=delay; delay+=1500; setTimeout(()=>{ A.fx.coin(); UI.toast(`✅ Задание: <b>${q.text}</b> — забери награду`); }, d); });
@@ -88,6 +89,13 @@
   }
 
   function setScreen(html){ overlay.innerHTML=html; overlay.classList.remove("hidden"); }
+  function countUp(el, to){
+    if(!el) return; const dur=600, t0=(window.performance&&performance.now)?performance.now():Date.now();
+    function tick(){ const now=(window.performance&&performance.now)?performance.now():Date.now();
+      const k=Math.min(1,(now-t0)/dur); el.textContent=Math.round(to*(1-Math.pow(1-k,3)));
+      if(k<1) requestAnimationFrame(tick); else el.textContent=to; }
+    requestAnimationFrame(tick);
+  }
   function home(){
     Q.ensureDaily(S.s, UI.dailyKeyNow(), RNG.todaySeed().seed);
     SE.ensure(S.s); S.save();
