@@ -1,10 +1,44 @@
 /* МЭТЧ — движок «три в ряд» (canvas). Свапы, матчи 3/4/5, каскады, спец-клиры. */
 (function(){
   const ROWS=8, COLS=7, COLORS=6, MOVES=20;
-  const PAL=["#ff5d7a","#ffcf4d","#1fd9bf","#8b6bff","#ff9d3d","#46c8ff"];
-  const EMO=["🐶","🐱","🐸","🦊","🐼","🐵"];
+  const PAL=["#ff5d7a","#ffd96b","#46d6a6","#a98bff","#ff9d3d","#46c8ff"];
   const SWAP=130, CLEAR=170, FALL=230;
   const A=window.MATCH_AUDIO;
+  const DARK="#1a1226";
+
+  /* ── свои векторные cursed-фигурки (canvas), idx 0..5 ── */
+  function circ(g,a,b,r){ g.beginPath(); g.arc(a,b,r,0,6.2832); g.fill(); }
+  function tri(g,ax,ay,bx,by,cx,cy){ g.beginPath(); g.moveTo(ax,ay); g.lineTo(bx,by); g.lineTo(cx,cy); g.closePath(); g.fill(); }
+  function eyes(g,a,b,sp,r){ g.fillStyle="#fff"; circ(g,a-sp,b,r); circ(g,a+sp,b,r); g.fillStyle=DARK; circ(g,a-sp,b,r*0.5); circ(g,a+sp,b,r*0.5); }
+  function drawCreature(g,x,y,s,idx){
+    const cx=x+s/2, cy=y+s*0.54, r=s*0.3, body=PAL[idx];
+    if(idx===0){            // демон
+      g.fillStyle=body; tri(g,cx-r*0.6,cy-r*0.4,cx-r*1.15,cy-r*1.35,cx-r*0.1,cy-r*0.7); tri(g,cx+r*0.6,cy-r*0.4,cx+r*1.15,cy-r*1.35,cx+r*0.1,cy-r*0.7);
+      circ(g,cx,cy,r); eyes(g,cx,cy-r*0.05,r*0.42,r*0.24);
+      g.fillStyle=DARK; g.fillRect(cx-r*0.45,cy+r*0.4,r*0.9,r*0.14);
+      g.fillStyle="#fff"; tri(g,cx-r*0.3,cy+r*0.4,cx-r*0.16,cy+r*0.66,cx-r*0.44,cy+r*0.54); tri(g,cx+r*0.3,cy+r*0.4,cx+r*0.16,cy+r*0.66,cx+r*0.44,cy+r*0.54);
+    } else if(idx===1){     // череп
+      g.fillStyle=body; circ(g,cx,cy-r*0.12,r); g.fillRect(cx-r*0.55,cy+r*0.35,r*1.1,r*0.5);
+      g.fillStyle=DARK; circ(g,cx-r*0.4,cy-r*0.12,r*0.27); circ(g,cx+r*0.4,cy-r*0.12,r*0.27); tri(g,cx,cy+r*0.1,cx-r*0.13,cy+r*0.33,cx+r*0.13,cy+r*0.33);
+      g.fillRect(cx-r*0.28,cy+r*0.45,r*0.06,r*0.4); g.fillRect(cx-r*0.03,cy+r*0.45,r*0.06,r*0.4); g.fillRect(cx+r*0.22,cy+r*0.45,r*0.06,r*0.4);
+    } else if(idx===2){     // слайм
+      g.fillStyle=body; g.beginPath(); g.arc(cx,cy,r,Math.PI,0);
+      g.lineTo(cx+r,cy+r*0.55); g.quadraticCurveTo(cx+r*0.6,cy+r*1.15,cx+r*0.33,cy+r*0.65); g.quadraticCurveTo(cx,cy+r*1.25,cx-r*0.33,cy+r*0.65); g.quadraticCurveTo(cx-r*0.6,cy+r*1.15,cx-r,cy+r*0.55); g.closePath(); g.fill();
+      eyes(g,cx,cy,r*0.36,r*0.22);
+    } else if(idx===3){     // призрак
+      g.fillStyle=body; g.beginPath(); g.arc(cx,cy,r,Math.PI,0); g.lineTo(cx+r,cy+r*0.7);
+      const n=4; for(let i=0;i<n;i++){ const xx=cx+r-(2*r)*((i+1)/n); g.quadraticCurveTo(xx+r/n,cy+r*(i%2?0.4:1.0),xx,cy+r*0.7); }
+      g.closePath(); g.fill(); eyes(g,cx,cy-r*0.08,r*0.36,r*0.22); g.fillStyle=DARK; circ(g,cx,cy+r*0.38,r*0.13);
+    } else if(idx===4){     // циклоп-пришелец
+      g.fillStyle=body; g.fillRect(cx-r*0.05,cy-r*1.45,r*0.1,r*0.6); circ(g,cx,cy-r*1.45,r*0.13);
+      circ(g,cx,cy,r); g.fillStyle="#fff"; circ(g,cx,cy,r*0.45); g.fillStyle=DARK; circ(g,cx,cy,r*0.22);
+    } else {                // проклятый глаз
+      g.fillStyle="#fff"; circ(g,cx,cy,r); g.fillStyle=body; circ(g,cx,cy,r*0.56); g.fillStyle=DARK; circ(g,cx,cy,r*0.26);
+      g.fillStyle="#fff"; circ(g,cx-r*0.12,cy-r*0.12,r*0.08);
+      g.strokeStyle="#ff5d7a"; g.lineWidth=Math.max(1,r*0.05); g.beginPath(); g.moveTo(cx-r,cy); g.lineTo(cx-r*0.55,cy-r*0.08); g.moveTo(cx+r,cy+r*0.1); g.lineTo(cx+r*0.55,cy); g.stroke();
+    }
+  }
+  function icon(idx,px){ try{ const o=document.createElement("canvas"); o.width=px;o.height=px; drawCreature(o.getContext("2d"),0,0,px,idx); return o.toDataURL(); }catch(e){ return ""; } }
 
   function create(opts){
     const canvas=opts.canvas, ctx=canvas.getContext("2d"), cb=opts.callbacks||{};
@@ -94,13 +128,7 @@
     });
 
     function pos(r,c){ return {x:ox+c*cell, y:oy+r*cell}; }
-    function gem(x,y,s,idx){
-      const m=s*0.07, sz=s-m*2;
-      ctx.fillStyle=PAL[idx]; round(x+m,y+m,sz,sz,s*0.27); ctx.fill();
-      ctx.fillStyle="rgba(255,255,255,.22)"; round(x+m,y+m,sz,sz*0.4,s*0.27); ctx.fill();
-      ctx.font=(s*0.58|0)+"px serif"; ctx.textAlign="center"; ctx.textBaseline="middle";
-      ctx.fillText(EMO[idx], x+s/2, y+s*0.57);
-    }
+    function gem(x,y,s,idx){ drawCreature(ctx,x,y,s,idx); }
     function round(x,y,w,h,r){ ctx.beginPath(); ctx.moveTo(x+r,y); ctx.arcTo(x+w,y,x+w,y+h,r); ctx.arcTo(x+w,y+h,x,y+h,r); ctx.arcTo(x,y+h,x,y,r); ctx.arcTo(x,y,x+w,y,r); ctx.closePath(); }
 
     const lerp=(a,b,t)=>a+(b-a)*t;
@@ -140,5 +168,5 @@
     function stop(){ running=false; cancelAnimationFrame(raf); }
     return { start, stop, get score(){return score;}, get moves(){return moves;}, get grid(){return grid;} };
   }
-  window.MATCH_GAME={ create };
+  window.MATCH_GAME={ create, icon };
 })();

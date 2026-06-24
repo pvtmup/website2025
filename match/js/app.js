@@ -30,7 +30,8 @@
     overlay.classList.remove("hidden"); count(document.getElementById("cnt"),score);
   }
   function home(){
-    const crew=["🐶","🐱","🐸","🦊","🐼","🐵"].map((e,i)=>`<span style="--i:${i}">${e}</span>`).join("");
+    const MG=window.MATCH_GAME;
+    const crew=[0,1,2,3,4,5].map(i=>`<img src="${MG.icon(i,84)}" style="--i:${i}" alt="">`).join("");
     overlay.innerHTML=`<div class="scr home">
       <div class="floaters" aria-hidden="true">${crew}</div>
       <div class="hero">
