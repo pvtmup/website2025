@@ -35,8 +35,8 @@
 
   async function shareResult(score, seed, equippedId, name){
     const TG = window.STACK_TG;
-    const tgLink = TG && TG.deepLink("d"+(seed>>>0)+"s"+score);
-    const url = tgLink || challengeLink(seed, score, name);
+    // веб-ссылка надёжна везде (открывается в Telegram-браузере без зависимости от @бота)
+    const url = challengeLink(seed, score, name);
     const text = `Я собрал ${score} в СТЭК 🧱 та же башня — побей меня:`;
     // внутри Telegram — нативный выбор чата
     if(TG && TG.isTG && TG.share(url, text)) return "вызов отправлен";
@@ -58,7 +58,7 @@
   function inviteLink(){ return baseUrl() + "?ref=" + Math.random().toString(36).slice(2,8); }
   async function shareInvite(){
     const TG = window.STACK_TG;
-    const url = (TG && TG.deepLink("ref")) || inviteLink();
+    const url = inviteLink();
     const text = `Залетай в СТЭК — башня в один тап 🧱`;
     if(TG && TG.isTG && TG.share(url, text)) return "приглашение отправлено";
     try{ if(navigator.share){ await navigator.share({text,url}); return "отправлено"; } }catch(e){ if(e&&e.name==="AbortError") return "отмена"; }
