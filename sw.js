@@ -19,8 +19,10 @@ self.addEventListener("fetch", (e)=>{
   const url=new URL(e.request.url);
   // never cache the Anthropic API
   if(url.host.includes("anthropic.com")) return;
-  // не вмешиваться в СТЭК (отдельный продукт, всегда свежий из сети)
+  // не вмешиваться в отдельные продукты — всегда свежие из сети
   if(url.pathname.includes("/stack/")) return;
+  if(url.pathname.includes("/match/")) return;
+  if(url.pathname.includes("/prism/")) return;
   if(e.request.method!=="GET") return;
   e.respondWith(
     caches.match(e.request).then(hit=> hit || fetch(e.request).then(res=>{
