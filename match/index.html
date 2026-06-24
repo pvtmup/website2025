@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <meta name="theme-color" content="#0b0b16" />
+  <title>МЭТЧ — три в ряд</title>
+  <meta name="description" content="МЭТЧ — три в ряд за 20 ходов. Каскады, взрывы, рекорд. Прототип." />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@600;700;800;900&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/styles.css" />
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+</head>
+<body>
+  <main class="frame">
+    <div id="wrap"><canvas id="game"></canvas>
+      <div id="hud" class="hidden"><div class="s">0</div><div class="c"></div><div class="m">ходов: 20</div></div>
+    </div>
+    <div id="overlay"></div>
+    <button id="mute">🔊</button>
+  </main>
+  <script src="js/audio.js"></script>
+  <script src="js/game.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
