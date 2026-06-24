@@ -24,4 +24,41 @@
   };
   window.STACK_AUDIO={ fx };
   window.addEventListener("pointerdown",()=>{ const c=ac(); if(c&&c.state==="suspended")c.resume(); });
+
+  /* ── генеративный бит: нарастает с высотой, уважает тумблер звука ── */
+  const SCALE=[0,3,5,7,10]; // минорная пентатоника
+  let musicOn=false, timer=null, noteT=0, step=0, getScore=()=>0;
+  const mfreq=m=>440*Math.pow(2,(m-69)/12);
+  function playAt(midi, when, dur, vol, type){
+    const c=ac(); if(!c) return;
+    const o=c.createOscillator(), g=c.createGain();
+    o.type=type; o.frequency.setValueAtTime(mfreq(midi), when);
+    g.gain.setValueAtTime(0, when); g.gain.linearRampToValueAtTime(vol, when+0.01);
+    g.gain.exponentialRampToValueAtTime(0.0001, when+dur);
+    o.connect(g); g.connect(c.destination); o.start(when); o.stop(when+dur+0.02);
+  }
+  function schedule(){
+    if(!musicOn) return;
+    if(!on()){ stopMusic(); return; }
+    const c=ac(); if(!c) return;
+    while(noteT < c.currentTime + 0.25){
+      const sc=getScore()||0;
+      const bpm=92 + Math.min(sc*2.2, 96);
+      const beat=60/bpm/2;                 // восьмые
+      const root=48;                        // C3
+      const deg=SCALE[step%SCALE.length];
+      if(step%4===0) playAt(root+deg-12, noteT, beat*0.95, 0.045, "sawtooth"); // бас
+      else playAt(root+deg+(Math.floor(sc/12)%2?12:0), noteT, beat*0.7, 0.022, "triangle"); // арп
+      noteT+=beat; step++;
+    }
+    timer=setTimeout(schedule, 45);
+  }
+  function startMusic(fn){
+    if(!on()) return; const c=ac(); if(!c) return;
+    getScore=fn||(()=>0); musicOn=true; step=0; noteT=c.currentTime+0.12; schedule();
+  }
+  function stopMusic(){ musicOn=false; if(timer){ clearTimeout(timer); timer=null; } }
+
+  window.STACK_AUDIO.startMusic = startMusic;
+  window.STACK_AUDIO.stopMusic = stopMusic;
 })();

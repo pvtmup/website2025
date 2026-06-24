@@ -46,6 +46,7 @@
       : "";
     return `
       <div class="scr home"${homeBg}>
+        <div class="floaters" aria-hidden="true"><span></span><span></span><span></span><span></span><span></span><span></span></div>
         ${topStats()}
         <div class="logo-wrap">
           <div class="logo">СТЭК</div>

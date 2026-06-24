@@ -58,10 +58,12 @@
     overlay.classList.add("hidden"); hud.classList.remove("hidden");
     hud.querySelector(".hud-score").textContent="0"; hud.querySelector(".hud-combo").style.opacity="0";
     playing=true; game.start(curSeed);
+    A.startMusic(()=>game?game.score:0);
   }
 
   function onOver(score){
     playing=false; lastScore=score; hud.classList.add("hidden");
+    A.stopMusic();
     if(TG) TG.haptic("error");
     const earned = score + perfectCount*3;
     S.addCoins(earned);
@@ -165,7 +167,11 @@
     setTimeout(()=>UI.toast("🎉 <b>+200 🪙</b> за первый вызов другу!"), 1100);
   }
 
-  mute.addEventListener("click",()=>{ S.s.sound=!S.s.sound; S.save(); refreshMute(); if(S.s.sound) A.fx.tap(); });
+  mute.addEventListener("click",()=>{
+    S.s.sound=!S.s.sound; S.save(); refreshMute();
+    if(S.s.sound){ A.fx.tap(); if(playing) A.startMusic(()=>game?game.score:0); }
+    else A.stopMusic();
+  });
 
   // boot
   if(TG){ TG.ready(); const n=TG.user(); if(n && !S.s.name){ S.s.name=n; S.save(); } }
