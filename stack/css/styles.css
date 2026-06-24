@@ -161,6 +161,7 @@ body{font-family:Inter,system-ui,sans-serif;background:radial-gradient(120% 80% 
 .over-card{margin:auto;width:100%;text-align:center;background:var(--card);border:1px solid var(--line);
   border-radius:24px;padding:24px 20px;box-shadow:0 20px 50px rgba(0,0,0,.45)}
 .newbest{color:var(--gold);font-weight:900;letter-spacing:.08em;margin-bottom:6px}
+.firstrun{color:var(--accent2);font-weight:900;font-size:18px;margin-bottom:6px;animation:pop .5s}
 .over-score{font-size:92px;font-weight:900;line-height:1}
 .over-sub{color:var(--muted);font-weight:600;margin-bottom:6px}
 .over-pct{color:var(--accent2);font-weight:800;font-size:13px;margin-bottom:14px}

@@ -82,7 +82,7 @@
     SE.addXP(S.s, xpGain);
     S.save();
     if(best){ setTimeout(()=>A.fx.win(),300); if(TG) TG.haptic("success"); }
-    setScreen(UI.screenOver({ score, best, coins:earned, maxCombo, mode, target: (mode==="duel"&&duel)?duel.score:null }));
+    setScreen(UI.screenOver({ score, best, coins:earned, maxCombo, mode, first:(S.s.games===1), target: (mode==="duel"&&duel)?duel.score:null }));
     countUp(overlay.querySelector(".over-score"), score);
     // тосты о заданиях/целях поверх
     let delay=400;
@@ -133,6 +133,7 @@
     if(el.dataset.buy){ const sk=SK.byId(el.dataset.buy);
       if(S.s.coins>=sk.cost){ S.addCoins(-sk.cost); S.own(sk.id); S.equip(sk.id); A.fx.coin(); setScreen(UI.screenShop()); }
       else { A.fx.over(); UI.toast("Не хватает монет 🪙"); } return; }
+    if(TG) TG.haptic("light");
     if(el.dataset.equip){ S.equip(el.dataset.equip); A.fx.tap(); setScreen(UI.screenShop()); return; }
     if(el.dataset.claimq){ const r=Q.claim(S.s, el.dataset.claimq); if(r>0){ S.addCoins(r); A.fx.coin(); if(TG)TG.haptic("success"); S.save(); home(); UI.toast(`+${r} 🪙 за задание`);} return; }
     if(el.dataset.claimfree){ claimSeason("free", parseInt(el.dataset.claimfree,10)); return; }

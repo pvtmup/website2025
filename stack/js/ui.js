@@ -157,7 +157,8 @@
     return `
       <div class="scr over">
         <div class="over-card">
-          ${isBest?'<div class="newbest">🏆 НОВЫЙ РЕКОРД</div>':''}
+          ${o.first?'<div class="firstrun">🎉 Твой первый забег!</div>':''}
+          ${isBest&&!o.first?'<div class="newbest">🏆 НОВЫЙ РЕКОРД</div>':''}
           <div class="over-score" data-to="${o.score}">${o.score}</div>
           <div class="over-sub">${o.mode==="daily"?"дневной челлендж":(o.mode==="duel"?"дуэль":"высота башни")}</div>
           ${o.score>=5?`<div class="over-pct">🔥 лучше ${Math.min(99,Math.max(5,Math.round(100*(1-1/(1+o.score/12)))))}% игроков</div>`:''}
@@ -168,7 +169,7 @@
           </div>
           ${o.mode==="duel"&&o.target!=null?`<div class="duel-res ${o.score>o.target?'win':'lose'}">${o.score>o.target?`🎉 ты побил(а) ${o.target}!`:`до цели не хватило: ${o.target}`}</div>`:''}
           <button class="big-btn play" data-act="retry">↺ Ещё раз</button>
-          <button class="big-btn gold" data-act="share">⇪ Бросить вызов другу${S.s.firstShareDone?'':'<span class="hint">+200 🪙 за первый вызов</span>'}</button>
+          <button class="big-btn gold ${S.s.firstShareDone?'':'reward'}" data-act="share">⇪ Бросить вызов другу${S.s.firstShareDone?'':'<span class="hint">+200 🪙 за первый вызов</span>'}</button>
           <div class="menu-row">
             <button class="m-btn" data-act="open-shop">🎨 Магазин</button>
             <button class="m-btn" data-act="go-home">🏠 Домой</button>
