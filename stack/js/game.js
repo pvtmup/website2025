@@ -140,7 +140,8 @@
       ctx.restore();
     }
 
-    return { start, stop, tap, resize, get score(){ return score; } };
+    return { start, stop, tap, resize, get score(){ return score; },
+      _debug(){ const top=placed[placed.length-1]; return cur&&top?{x:cur.x,w:cur.w,topX:top.x,perfectTol:PERFECT}:null; } };
   }
   window.STACK_GAME = { create };
 })();
