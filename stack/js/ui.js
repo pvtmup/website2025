@@ -39,11 +39,13 @@
   }
   function screenHome(duel){
     const st=S.s;
+    const c = window.STACK_SEASON ? window.STACK_SEASON.current() : {hue:250};
+    const homeBg = ` style="background:radial-gradient(120% 65% at 50% 0%, hsl(${c.hue} 45% 15%), rgba(11,11,22,.96) 70%)"`;
     const duelBanner = duel
       ? `<div class="duel-ban" data-act="play-duel"><b>⚔️ Дуэль</b><br><span>тебя вызвали: побей <b>${duel.score||"рекорд"}</b> на той же башне → играть</span></div>`
       : "";
     return `
-      <div class="scr home">
+      <div class="scr home"${homeBg}>
         ${topStats()}
         <div class="logo-wrap">
           <div class="logo">СТЭК</div>
@@ -164,7 +166,7 @@
           </div>
           ${o.mode==="duel"&&o.target!=null?`<div class="duel-res ${o.score>o.target?'win':'lose'}">${o.score>o.target?`🎉 ты побил(а) ${o.target}!`:`до цели не хватило: ${o.target}`}</div>`:''}
           <button class="big-btn play" data-act="retry">↺ Ещё раз</button>
-          <button class="big-btn gold" data-act="share">⇪ Бросить вызов другу</button>
+          <button class="big-btn gold" data-act="share">⇪ Бросить вызов другу${S.s.firstShareDone?'':'<span class="hint">+200 🪙 за первый вызов</span>'}</button>
           <div class="menu-row">
             <button class="m-btn" data-act="open-shop">🎨 Магазин</button>
             <button class="m-btn" data-act="go-home">🏠 Домой</button>

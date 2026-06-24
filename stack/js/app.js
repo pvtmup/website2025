@@ -145,9 +145,17 @@
     else if(a==="go-home") home();
     else if(a==="open-shop") setScreen(UI.screenShop());
     else if(a==="open-board") setScreen(UI.screenBoard());
-    else if(a==="invite") SH.shareInvite().then(r=>UI.toast("📨 "+r));
-    else if(a==="share") SH.shareResult(lastScore, curSeed, S.s.equipped).then(r=>UI.toast("⇪ "+r));
+    else if(a==="invite") SH.shareInvite().then(r=>{ UI.toast("📨 "+r); viralReward(r); });
+    else if(a==="share") SH.shareResult(lastScore, curSeed, S.s.equipped).then(r=>{ UI.toast("⇪ "+r); viralReward(r); });
   });
+
+  // награда за первый отправленный вызов/инвайт — буст вирального действия
+  function viralReward(status){
+    if(status==="отмена" || S.s.firstShareDone) return;
+    S.s.firstShareDone=true; S.addCoins(200); S.save();
+    if(TG) TG.haptic("success");
+    setTimeout(()=>UI.toast("🎉 <b>+200 🪙</b> за первый вызов другу!"), 1100);
+  }
 
   mute.addEventListener("click",()=>{ S.s.sound=!S.s.sound; S.save(); refreshMute(); if(S.s.sound) A.fx.tap(); });
 

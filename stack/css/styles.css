@@ -40,7 +40,9 @@ body{font-family:Inter,system-ui,sans-serif;background:radial-gradient(120% 80% 
 #overlay::-webkit-scrollbar{display:none}
 #overlay.hidden{display:none}
 .scr{min-height:100%;display:flex;flex-direction:column;padding:22px 20px calc(24px + var(--safe));
-  background:radial-gradient(120% 70% at 50% 0%,rgba(27,19,48,.6),rgba(11,11,22,.92))}
+  background:radial-gradient(120% 70% at 50% 0%,rgba(27,19,48,.6),rgba(11,11,22,.92));
+  animation:scrin .28s cubic-bezier(.2,.8,.2,1)}
+@keyframes scrin{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
 .scr.home,.scr.over{justify-content:space-between}
 .center{text-align:center}
 .muted{color:var(--muted)}
