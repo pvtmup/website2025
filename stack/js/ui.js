@@ -169,7 +169,7 @@
           </div>
           ${o.mode==="duel"&&o.target!=null?`<div class="duel-res ${o.score>o.target?'win':'lose'}">${o.score>o.target?`🎉 обогнал${o.duelName?" "+esc(o.duelName):""} на ${o.score-o.target}!`:`не хватило ${o.target-o.score} до ${o.duelName?esc(o.duelName)+" ("+o.target+")":o.target}`}</div>`:''}
           <button class="big-btn play" data-act="retry">↺ Ещё раз</button>
-          <button class="big-btn gold ${S.s.firstShareDone?'':'reward'}" data-act="share">⇪ Бросить вызов другу${S.s.firstShareDone?'':'<span class="hint">+200 🪙 за первый вызов</span>'}</button>
+          <button class="big-btn gold ${S.s.firstShareDone?'':'reward'}" data-act="share">${o.mode==="duel"?"🔄 Ответить на вызов":"⇪ Бросить вызов другу"}${S.s.firstShareDone?'':'<span class="hint">+200 🪙 за первый вызов</span>'}</button>
           <div class="menu-row">
             <button class="m-btn" data-act="open-shop">🎨 Магазин</button>
             <button class="m-btn" data-act="go-home">🏠 Домой</button>
@@ -229,7 +229,7 @@
   }
 
   let toastT;
-  function toast(html){ const el=document.getElementById("toast"); el.innerHTML=html; el.classList.add("show"); clearTimeout(toastT); toastT=setTimeout(()=>el.classList.remove("show"),2600); }
+  function toast(html){ const el=document.getElementById("toast"); el.innerHTML=window.STACK_I18N?window.STACK_I18N.t(html):html; el.classList.add("show"); clearTimeout(toastT); toastT=setTimeout(()=>el.classList.remove("show"),2600); }
 
   window.STACK_UI = { screenHome, screenOver, screenShop, screenBoard, screenAchs, screenSeason, screenHow, toast, dailyKeyNow };
 })();

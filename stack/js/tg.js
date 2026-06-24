@@ -29,6 +29,9 @@
   function startParam(){
     try{ return (wa && wa.initDataUnsafe && wa.initDataUnsafe.start_param) || ""; }catch(e){ return ""; }
   }
+  function langCode(){
+    try{ return (wa && wa.initDataUnsafe && wa.initDataUnsafe.user && wa.initDataUnsafe.user.language_code) || ""; }catch(e){ return ""; }
+  }
 
   // тактильная отдача
   function haptic(kind){
@@ -64,5 +67,5 @@
     cb(null);
   }
 
-  window.STACK_TG = { isTG, ready, user, startParam, haptic, deepLink, share, cloudSet, cloudGet, APP_URL };
+  window.STACK_TG = { isTG, ready, user, startParam, langCode, haptic, deepLink, share, cloudSet, cloudGet, APP_URL };
 })();

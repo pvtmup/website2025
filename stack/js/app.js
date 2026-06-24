@@ -11,6 +11,8 @@
   const canvas=document.getElementById("game");
   const wrap=document.getElementById("game-wrap");
   const mute=document.getElementById("mute");
+  const coach=document.getElementById("coach");
+  const langBtn=document.getElementById("lang");
 
   let game=null, playing=false, mode="endless", curSeed=0, lastScore=0, maxCombo=0, perfectCount=0, duel=null;
   const getSkin=()=>SK.byId(S.s.equipped);
@@ -59,6 +61,7 @@
     hud.querySelector(".hud-score").textContent="0"; hud.querySelector(".hud-combo").style.opacity="0";
     playing=true; game.start(curSeed);
     A.startMusic(()=>game?game.score:0);
+    if(coach){ if(S.s.games===0) coach.classList.remove("hidden"); else coach.classList.add("hidden"); }
   }
 
   function onOver(score){
@@ -91,7 +94,14 @@
     freshA.forEach(a=>{ const d=delay; delay+=1500; setTimeout(()=>{ A.fx.win(); if(TG)TG.haptic("success"); UI.toast(`🏅 Цель: <b>${a.text}</b> +${a.reward} 🪙`); }, d); });
   }
 
-  function setScreen(html){ overlay.innerHTML=html; overlay.classList.remove("hidden"); }
+  const I18N=window.STACK_I18N;
+  function setScreen(html){ overlay.innerHTML=I18N?I18N.t(html):html; overlay.classList.remove("hidden"); }
+  function localizeChrome(){
+    if(!I18N) return;
+    const hint=hud&&hud.querySelector(".hud-hint"); if(hint) hint.textContent=I18N.t("тап — поставить блок");
+    if(coach) coach.textContent=I18N.t("Тапни, чтобы поставить блок")+" 👆";
+    if(langBtn) langBtn.textContent = I18N.get()==="en" ? "RU" : "EN";
+  }
   function countUp(el, to){
     if(!el) return; const dur=600, t0=(window.performance&&performance.now)?performance.now():Date.now();
     function tick(){ const now=(window.performance&&performance.now)?performance.now():Date.now();
@@ -124,7 +134,7 @@
   }
 
   // ввод: тап по полю = поставить блок
-  wrap.addEventListener("pointerdown",(e)=>{ if(playing){ e.preventDefault(); game.tap(); } }, {passive:false});
+  wrap.addEventListener("pointerdown",(e)=>{ if(playing){ e.preventDefault(); if(coach) coach.classList.add("hidden"); game.tap(); } }, {passive:false});
   window.addEventListener("keydown",(e)=>{ if(e.code==="Space"||e.code==="ArrowDown"){ if(playing){ e.preventDefault(); game.tap(); } } });
 
   function refreshMute(){ mute.textContent = S.s.sound ? "🔊" : "🔇"; }
@@ -175,8 +185,19 @@
     else A.stopMusic();
   });
 
+  if(langBtn) langBtn.addEventListener("click",()=>{
+    const nl = (I18N && I18N.get()==="en") ? "ru" : "en";
+    S.s.lang=nl; S.save(); if(I18N) I18N.set(nl); localizeChrome(); A.fx.tap();
+    if(!playing) home();
+  });
+
   // boot
   if(TG){ TG.ready(); const n=TG.user(); if(n && !S.s.name){ S.s.name=n; S.save(); } }
+  // язык: сохранённый → из Telegram → ru по умолчанию
+  (function(){ let lng=S.s.lang;
+    if(!lng){ const lc=(TG&&TG.langCode?TG.langCode():"").toLowerCase(); lng = lc.startsWith("ru")?"ru":((TG&&TG.isTG)?"en":"ru"); }
+    if(I18N) I18N.set(lng); })();
+  localizeChrome();
   parseURL();
   refreshMute();
   if(!S.s.seenHow){ setScreen(UI.screenHow()); } else { home(); }
