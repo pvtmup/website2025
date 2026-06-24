@@ -1,7 +1,7 @@
 /* МЭТЧ — движок «три в ряд» (canvas). Свапы, матчи 3/4/5, каскады, спец-клиры. */
 (function(){
   const ROWS=8, COLS=7, COLORS=6, MOVES=20;
-  const PAL=["#ff5d7a","#ffd96b","#46d6a6","#a98bff","#ff9d3d","#46c8ff"];
+  const PAL=["#ff2e63","#c6ff00","#00f0ff","#b14bff","#ff7a00","#ff00e6"];
   const SWAP=130, CLEAR=170, FALL=230;
   const A=window.MATCH_AUDIO;
   const DARK="#1a1226";
@@ -44,7 +44,7 @@
     const canvas=opts.canvas, ctx=canvas.getContext("2d"), cb=opts.callbacks||{};
     let W=0,H=0,DPR=1,cell=40,ox=0,oy=0;
     let grid=[], sel=null, busy=false, score=0, moves=0, cascade=0, running=false, raf=0;
-    let sliding=null, clearing=null, falling=null, parts=[];
+    let sliding=null, clearing=null, falling=null, parts=[], shake=0, glitch=null;
 
     function resize(){
       const r=canvas.getBoundingClientRect(); DPR=Math.min(2,window.devicePixelRatio||1);
@@ -105,6 +105,7 @@
       score += clr.size*30*cascade; cb.score&&cb.score(score, cascade);
       A&&A.fx.clear(cascade);
       clearing={set:clr,t0:now()};
+      shake=Math.min(16, 4+cascade*3); glitch={t0:now(), amp:Math.min(1, 0.25+cascade*0.3)};
       setTimeout(()=>{
         clr.forEach(k=>{ const r=(k/COLS)|0,c=k%COLS; burst(r,c,grid[r][c]); grid[r][c]=-1; });
         const drop=applyGravity(); clearing=null; falling={drop,t0:now()};
@@ -112,8 +113,8 @@
       }, CLEAR);
     }
     function burst(r,c,v){ const p=pos(r,c), col=PAL[v]||"#fff";
-      for(let i=0;i<6;i++){ const a=Math.random()*6.28, sp=40+Math.random()*120;
-        parts.push({x:p.x+cell/2,y:p.y+cell/2,vx:Math.cos(a)*sp,vy:Math.sin(a)*sp-40,life:1,col}); } }
+      for(let i=0;i<9;i++){ const a=Math.random()*6.28, sp=60+Math.random()*180;
+        parts.push({x:p.x+cell/2,y:p.y+cell/2,vx:Math.cos(a)*sp,vy:Math.sin(a)*sp-60,life:1,col,sz:3+Math.random()*5}); } }
     function over(){ running=false; cancelAnimationFrame(raf); A&&A.fx.over(); cb.onOver&&cb.onOver(score); }
 
     function now(){ return (window.performance&&performance.now)?performance.now():Date.now(); }
@@ -134,11 +135,15 @@
     const lerp=(a,b,t)=>a+(b-a)*t;
     const easeOut=t=>1-Math.pow(1-t,3);
     function draw(){
-      ctx.clearRect(0,0,W,H);
       const t=now();
+      // проклятый фон
+      const bg=ctx.createLinearGradient(0,0,0,H); bg.addColorStop(0,"#0c0716"); bg.addColorStop(1,"#05030a");
+      ctx.fillStyle=bg; ctx.fillRect(0,0,W,H);
       const sp = sliding ? Math.min(1,(t-sliding.t0)/SWAP) : 0;
       const cp = clearing ? Math.min(1,(t-clearing.t0)/CLEAR) : 0;
       const fp = falling ? easeOut(Math.min(1,(t-falling.t0)/FALL)) : 1;
+      const sx=shake?(Math.random()-0.5)*shake:0, sy=shake?(Math.random()-0.5)*shake:0;
+      ctx.save(); ctx.translate(sx,sy);
       for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++){
         const v=grid[r][c]; if(v<0) continue;
         let {x,y}=pos(r,c), s=cell;
@@ -152,18 +157,28 @@
       }
       if(sel && !busy){ const p=pos(sel.r,sel.c); const pu=2+Math.sin(t/120)*1.5;
         ctx.strokeStyle="#fff"; ctx.lineWidth=3; round(p.x+pu,p.y+pu,cell-pu*2,cell-pu*2,cell*0.26); ctx.stroke(); }
-      // частицы
       if(parts.length){ const dt=1/60;
-        for(const p of parts){ p.vy+=600*dt; p.x+=p.vx*dt; p.y+=p.vy*dt; p.life-=dt*1.6; }
+        for(const p of parts){ p.vy+=700*dt; p.x+=p.vx*dt; p.y+=p.vy*dt; p.life-=dt*1.6; }
         parts=parts.filter(p=>p.life>0);
-        for(const p of parts){ ctx.globalAlpha=Math.max(0,p.life); ctx.fillStyle=p.col; ctx.fillRect(p.x-3,p.y-3,6,6); }
+        for(const p of parts){ ctx.globalAlpha=Math.max(0,p.life); ctx.fillStyle=p.col; const z=p.sz||5; ctx.fillRect(p.x-z/2,p.y-z/2,z,z); }
         ctx.globalAlpha=1;
+      }
+      ctx.restore();
+      if(shake>0.3) shake*=0.86; else shake=0;
+      // виньетка
+      const vg=ctx.createRadialGradient(W/2,H*0.45,H*0.3,W/2,H*0.5,H*0.75);
+      vg.addColorStop(0,"rgba(0,0,0,0)"); vg.addColorStop(1,"rgba(0,0,0,.5)"); ctx.fillStyle=vg; ctx.fillRect(0,0,W,H);
+      // глитч-слайсы при клире
+      if(glitch){ const gp=(t-glitch.t0)/200;
+        if(gp<1){ for(let i=0;i<3;i++){ const sliceY=oy+Math.random()*ROWS*cell, h=4+Math.random()*12, off=(Math.random()-0.5)*22*glitch.amp;
+          try{ ctx.globalAlpha=.55; ctx.drawImage(canvas, 0, sliceY*DPR, canvas.width, h*DPR, off, sliceY, W, h); ctx.globalAlpha=1; }catch(e){} } }
+        else glitch=null;
       }
       raf=requestAnimationFrame(draw);
     }
 
     function start(){ resize(); fill(); while(scan()){ fill(); } score=0; moves=MOVES; cascade=0; sel=null; busy=false; running=true;
-      sliding=null; clearing=null; falling=null; parts=[];
+      sliding=null; clearing=null; falling=null; parts=[]; shake=0; glitch=null;
       cb.score&&cb.score(0,0); cb.moves&&cb.moves(moves); cancelAnimationFrame(raf); raf=requestAnimationFrame(draw); }
     function stop(){ running=false; cancelAnimationFrame(raf); }
     return { start, stop, get score(){return score;}, get moves(){return moves;}, get grid(){return grid;} };
