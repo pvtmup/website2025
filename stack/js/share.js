@@ -32,14 +32,18 @@
   }
 
   async function shareResult(score, seed, equippedId){
-    const url = challengeLink(seed, score);
-    const text = `Я собрал ${score} в СТЭК 🧱 та же башня — побей: ${url}`;
+    const TG = window.STACK_TG;
+    const tgLink = TG && TG.deepLink("d"+(seed>>>0)+"s"+score);
+    const url = tgLink || challengeLink(seed, score);
+    const text = `Я собрал ${score} в СТЭК 🧱 та же башня — побей меня:`;
+    // внутри Telegram — нативный выбор чата
+    if(TG && TG.isTG && TG.share(url, text)) return "вызов отправлен";
     const data = buildCard(score, seed, equippedId);
     try{
       if(navigator.canShare){
         const blob = await (await fetch(data)).blob();
         const file = new File([blob],"stack.png",{type:"image/png"});
-        if(navigator.canShare({files:[file]})){ await navigator.share({files:[file], text}); return "отправлено"; }
+        if(navigator.canShare({files:[file]})){ await navigator.share({files:[file], text:text+" "+url}); return "отправлено"; }
       }
       if(navigator.share){ await navigator.share({text, url}); return "отправлено"; }
     }catch(e){ if(e&&e.name==="AbortError") return "отмена"; }
@@ -51,8 +55,10 @@
 
   function inviteLink(){ return baseUrl() + "?ref=" + Math.random().toString(36).slice(2,8); }
   async function shareInvite(){
-    const url = inviteLink();
-    const text = `Залетай в СТЭК — башня в один тап 🧱 ${url}`;
+    const TG = window.STACK_TG;
+    const url = (TG && TG.deepLink("ref")) || inviteLink();
+    const text = `Залетай в СТЭК — башня в один тап 🧱`;
+    if(TG && TG.isTG && TG.share(url, text)) return "приглашение отправлено";
     try{ if(navigator.share){ await navigator.share({text,url}); return "отправлено"; } }catch(e){ if(e&&e.name==="AbortError") return "отмена"; }
     try{ await navigator.clipboard.writeText(url); return "ссылка скопирована"; }catch(e){ return url; }
   }

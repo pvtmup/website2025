@@ -1,7 +1,8 @@
 /* СТЭК — оркестрация */
 (function(){
   const G=window.STACK_GAME, S=window.STACK_STORE, UI=window.STACK_UI,
-        SK=window.STACK_SKINS, SH=window.STACK_SHARE, RNG=window.STACK_RNG, A=window.STACK_AUDIO;
+        SK=window.STACK_SKINS, SH=window.STACK_SHARE, RNG=window.STACK_RNG, A=window.STACK_AUDIO,
+        TG=window.STACK_TG;
   const overlay=document.getElementById("overlay");
   const hud=document.getElementById("hud");
   const canvas=document.getElementById("game");
@@ -13,11 +14,17 @@
 
   function parseURL(){
     const p=new URLSearchParams(location.search);
-    if(p.get("ref") && !localStorage.getItem("stack.refclaimed")){
+    // Telegram start_param: "d<seed>s<score>" (дуэль) или "ref" (реферал)
+    const sp = (TG && TG.startParam()) || "";
+    const m = /^d(\d+)(?:s(\d+))?$/.exec(sp);
+    if(m){ duel={ seed:(parseInt(m[1],10)>>>0), score: m[2]?parseInt(m[2],10):null }; }
+    const isRef = (sp==="ref") || p.get("ref");
+    if(isRef && !localStorage.getItem("stack.refclaimed")){
       S.addCoins(150); localStorage.setItem("stack.refclaimed","1");
       setTimeout(()=>UI.toast(`<b>+150 🪙</b> бонус за приглашение`),600);
     }
-    if(p.get("seed")){ duel={ seed:(parseInt(p.get("seed"),10)>>>0), score: p.get("s")?parseInt(p.get("s"),10):null }; }
+    // веб-фолбэк ?seed=&s=
+    if(!duel && p.get("seed")){ duel={ seed:(parseInt(p.get("seed"),10)>>>0), score: p.get("s")?parseInt(p.get("s"),10):null }; }
     try{ history.replaceState(null,"",location.pathname); }catch(e){}
   }
 
@@ -26,6 +33,7 @@
   function onScore(score, info){
     if(info.combo>maxCombo) maxCombo=info.combo;
     if(info.perfect) perfectCount++;
+    if(TG) TG.haptic(info.perfect ? "rigid" : "light");
     hud.querySelector(".hud-score").textContent=score;
     const cc=hud.querySelector(".hud-combo");
     if(info.combo>1){ cc.textContent="×"+info.combo+" комбо"; cc.style.opacity="1"; cc.classList.remove("pop"); void cc.offsetWidth; cc.classList.add("pop"); }
@@ -43,13 +51,14 @@
 
   function onOver(score){
     playing=false; lastScore=score; hud.classList.add("hidden");
+    if(TG) TG.haptic("error");
     const earned = score + perfectCount*3;
     S.addCoins(earned);
     let best=false;
     if(score>S.s.best){ S.s.best=score; best=true; }
     if(mode==="daily"){ const k=UI.dailyKeyNow(); if(S.s.dailyKey!==k){ S.s.dailyKey=k; S.s.dailyBest=0; } if(score>S.s.dailyBest) S.s.dailyBest=score; }
     S.s.games=(S.s.games||0)+1; S.save();
-    if(best) setTimeout(()=>A.fx.win(),300);
+    if(best){ setTimeout(()=>A.fx.win(),300); if(TG) TG.haptic("success"); }
     setScreen(UI.screenOver({ score, best, coins:earned, maxCombo, mode, target: (mode==="duel"&&duel)?duel.score:null }));
   }
 
@@ -83,6 +92,7 @@
   mute.addEventListener("click",()=>{ S.s.sound=!S.s.sound; S.save(); refreshMute(); if(S.s.sound) A.fx.tap(); });
 
   // boot
+  if(TG){ TG.ready(); const n=TG.user(); if(n && !S.s.name){ S.s.name=n; S.save(); } }
   parseURL();
   refreshMute();
   home();

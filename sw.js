@@ -1,5 +1,5 @@
 /* LORE service worker — app-shell cache, offline-first */
-const CACHE = "lore-v6-ru";
+const CACHE = "lore-v7-ru";
 const SHELL = [
   "./","./index.html","./css/styles.css",
   "./js/data.js","./js/art.js","./js/engine.js","./js/store.js",
@@ -19,6 +19,8 @@ self.addEventListener("fetch", (e)=>{
   const url=new URL(e.request.url);
   // never cache the Anthropic API
   if(url.host.includes("anthropic.com")) return;
+  // не вмешиваться в СТЭК (отдельный продукт, всегда свежий из сети)
+  if(url.pathname.includes("/stack/")) return;
   if(e.request.method!=="GET") return;
   e.respondWith(
     caches.match(e.request).then(hit=> hit || fetch(e.request).then(res=>{
