@@ -6,10 +6,12 @@
 
   const NAMES = ["Соня","Кай","Макс","Алиса","Дэн","Ника","Лёва","Рита","Тимур","Ева","Глеб","Маша","Артём","Юля","Стас","Лера","Марк","Аня"];
 
+  function coinChip(){ return `<div class="st"><span>🪙</span> <b>${fmt(S.s.coins)}</b></div>`; }
+  function bar(title, right){ return `<div class="bar"><button class="back" data-act="go-home">←</button><div class="bar-t">${title}</div>${right===undefined?coinChip():right}</div>`; }
   function topStats(){
     const st=S.s;
     return `<div class="stats">
-      <div class="st"><span>🪙</span> <b>${fmt(st.coins)}</b></div>
+      ${coinChip()}
       <div class="st"><span>🔥</span> <b>${st.streak||0}</b></div>
       <div class="st"><span>🏆</span> <b>${fmt(st.best)}</b></div>
     </div>`;
@@ -122,7 +124,7 @@
       : `<button class="big-btn gold" data-act="buy-pass">🎟️ Активировать пасс — ${SE.PASS_COST} 🪙<span class="hint">открывает все премиум-награды сезона + эксклюзивные скины</span></button>`;
     return `
       <div class="scr">
-        <div class="bar"><button class="back" data-act="go-home">←</button><div class="bar-t">${c.emoji} ${esc(c.name)}</div><div class="st"><span>🪙</span> <b>${fmt(st.coins)}</b></div></div>
+        ${bar(c.emoji+" "+esc(c.name))}
         <p class="muted center" style="margin:2px 20px 10px">осталось ${c.daysLeft} дн. · уровень ${tier}/10 · ${st.season.xp} XP · играй, чтобы прокачивать</p>
         ${passBox}
         <div style="height:12px"></div>
@@ -144,7 +146,7 @@
     const got=(st.achdone||[]).length;
     return `
       <div class="scr">
-        <div class="bar"><button class="back" data-act="go-home">←</button><div class="bar-t">Цели (${got}/${Q.ACHS.length})</div><div class="st"><span>🪙</span> <b>${fmt(st.coins)}</b></div></div>
+        ${bar("Цели ("+got+"/"+Q.ACHS.length+")")}
         <div class="achs">${rows}</div>
         <p class="foot">Долгосрочные цели — награда начисляется автоматически при выполнении. Есть к чему возвращаться.</p>
       </div>`;
@@ -196,7 +198,7 @@
     }).join("");
     return `
       <div class="scr">
-        <div class="bar"><button class="back" data-act="go-home">←</button><div class="bar-t">Магазин скинов</div><div class="st"><span>🪙</span> <b>${fmt(st.coins)}</b></div></div>
+        ${bar("Магазин скинов")}
         <div class="shop-grid">${cards}</div>
         <p class="foot">Скины меняют только вид башни — никакого преимущества. Монеты капают за высоту и перфекты.</p>
       </div>`;
@@ -221,7 +223,7 @@
       .map((r,i)=>`<div class="brow ${r.me?'me':''}"><span class="rk">${i+1}</span><span class="bn">${esc(r.n)} ${r.me?'<b>· ты</b>':''}</span><span class="bs">${fmt(r.sc)}</span></div>`).join("");
     return `
       <div class="scr">
-        <div class="bar"><button class="back" data-act="go-home">←</button><div class="bar-t">Таблица · сегодня</div><div></div></div>
+        ${bar("Таблица · сегодня","<div></div>")}
         <p class="muted center" style="margin:6px 20px">Один сид на день у всех. ${st.dailyKey===dailyKeyNow()?"":"Сыграй дневной челлендж, чтобы попасть в список."}</p>
         <div class="board">${rows}</div>
         <p class="foot">Каждый день — новая башня и новый рейтинг. Возвращайся за местом в топе.</p>
