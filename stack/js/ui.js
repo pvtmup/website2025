@@ -15,6 +15,28 @@
     </div>`;
   }
 
+  function rewardBtn(){
+    const st=S.s; const rf=window.STACK_REWARD||(()=>20);
+    if(st.claimedRewardDay===dailyKeyNow()) return "";
+    return `<button class="big-btn gold reward" data-act="claim-reward">🎁 Ежедневная награда +${rf(st.streak||1)} 🪙<span class="hint">стрик ${st.streak||0}🔥 · заходи каждый день — награда растёт</span></button>`;
+  }
+  function questsPanel(){
+    const Q=window.STACK_QUESTS, st=S.s;
+    if(!Q || !st.quests) return "";
+    const rows = st.quests.items.map(it=>{
+      const d=Q.defById(it.id); if(!d) return "";
+      const ready = it.prog>=d.goal;
+      const right = it.claimed ? `<span class="q-done">✓</span>`
+        : ready ? `<button class="q-claim" data-claimq="${it.id}">+${d.reward}🪙</button>`
+        : `<span class="q-prog">${Math.min(it.prog,d.goal)}/${d.goal}</span>`;
+      const pct = Math.min(100, (Math.min(it.prog,d.goal)/d.goal)*100);
+      return `<div class="quest ${it.claimed?'cl':''}">
+        <div class="q-fill" style="width:${it.claimed?100:pct}%"></div>
+        <div class="q-row"><span>${esc(d.text)}</span>${right}</div>
+      </div>`;
+    }).join("");
+    return `<div class="panel"><div class="panel-h">🎯 Задания дня<span class="muted">обновятся завтра</span></div><div class="quests">${rows}</div></div>`;
+  }
   function screenHome(duel){
     const st=S.s;
     const duelBanner = duel
@@ -28,16 +50,38 @@
           <div class="slogan">башня в один тап</div>
         </div>
         ${duelBanner}
+        ${rewardBtn()}
         <div class="menu">
           <button class="big-btn play" data-act="play-endless">▶ Играть</button>
           <button class="big-btn ghost" data-act="play-daily">📅 Дневной челлендж<span class="hint">сегодня · твой рекорд ${st.dailyKey===dailyKeyNow()?fmt(st.dailyBest):0}</span></button>
-          <div class="menu-row">
-            <button class="m-btn" data-act="open-shop">🎨 Магазин</button>
-            <button class="m-btn" data-act="open-board">📊 Таблица</button>
-            <button class="m-btn" data-act="invite">📨 Позвать</button>
-          </div>
         </div>
-        <p class="foot">Один тап — ставишь блок. Точно по центру — комбо и шире башня. Дневной сид у всех одинаковый — сравнивайся честно.</p>
+        ${questsPanel()}
+        <div class="menu-row wrap">
+          <button class="m-btn" data-act="open-shop">🎨 Магазин</button>
+          <button class="m-btn" data-act="open-board">📊 Таблица</button>
+          <button class="m-btn" data-act="open-achs">🏅 Цели</button>
+          <button class="m-btn" data-act="invite">📨 Позвать</button>
+        </div>
+        <p class="foot">Один тап — ставишь блок. Точно по центру — комбо и шире башня. Заходи каждый день: награда за стрик и новые задания.</p>
+      </div>`;
+  }
+
+  function screenAchs(){
+    const Q=window.STACK_QUESTS, st=S.s;
+    const rows = Q.ACHS.map(a=>{
+      const done = (st.achdone||[]).includes(a.id);
+      return `<div class="ach ${done?'on':''}">
+        <div class="ach-i">${done?'🏅':'🔒'}</div>
+        <div class="ach-b"><div class="ach-t">${esc(a.text)}</div><div class="ach-r">+${a.reward} 🪙</div></div>
+        <div>${done?'<span class="q-done">✓</span>':''}</div>
+      </div>`;
+    }).join("");
+    const got=(st.achdone||[]).length;
+    return `
+      <div class="scr">
+        <div class="bar"><button class="back" data-act="go-home">←</button><div class="bar-t">Цели (${got}/${Q.ACHS.length})</div><div class="st"><span>🪙</span> <b>${fmt(st.coins)}</b></div></div>
+        <div class="achs">${rows}</div>
+        <p class="foot">Долгосрочные цели — награда начисляется автоматически при выполнении. Есть к чему возвращаться.</p>
       </div>`;
   }
   function dailyKeyNow(){ const d=new Date(); return d.getFullYear()+"-"+(d.getMonth()+1)+"-"+d.getDate(); }
@@ -120,5 +164,5 @@
   let toastT;
   function toast(html){ const el=document.getElementById("toast"); el.innerHTML=html; el.classList.add("show"); clearTimeout(toastT); toastT=setTimeout(()=>el.classList.remove("show"),2600); }
 
-  window.STACK_UI = { screenHome, screenOver, screenShop, screenBoard, toast, dailyKeyNow };
+  window.STACK_UI = { screenHome, screenOver, screenShop, screenBoard, screenAchs, toast, dailyKeyNow };
 })();

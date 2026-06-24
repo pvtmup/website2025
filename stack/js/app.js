@@ -2,7 +2,10 @@
 (function(){
   const G=window.STACK_GAME, S=window.STACK_STORE, UI=window.STACK_UI,
         SK=window.STACK_SKINS, SH=window.STACK_SHARE, RNG=window.STACK_RNG, A=window.STACK_AUDIO,
-        TG=window.STACK_TG;
+        TG=window.STACK_TG, Q=window.STACK_QUESTS;
+  const REWARD_TABLE=[20,40,60,80,100,120,150];
+  function rewardFor(streak){ return REWARD_TABLE[Math.min(Math.max((streak||1)-1,0),6)]; }
+  window.STACK_REWARD = rewardFor; // для UI
   const overlay=document.getElementById("overlay");
   const hud=document.getElementById("hud");
   const canvas=document.getElementById("game");
@@ -57,13 +60,27 @@
     let best=false;
     if(score>S.s.best){ S.s.best=score; best=true; }
     if(mode==="daily"){ const k=UI.dailyKeyNow(); if(S.s.dailyKey!==k){ S.s.dailyKey=k; S.s.dailyBest=0; } if(score>S.s.dailyBest) S.s.dailyBest=score; }
-    S.s.games=(S.s.games||0)+1; S.save();
+    S.s.games=(S.s.games||0)+1;
+    S.s.totalPerfects=(S.s.totalPerfects||0)+perfectCount;
+    // прогресс заданий
+    const doneQ = Q.applyResult(S.s, { score, perfects:perfectCount, maxCombo, mode });
+    // долгосрочные цели (авто-награда)
+    const freshA = Q.checkAchs(S.s);
+    freshA.forEach((a,i)=>{ S.addCoins(a.reward); });
+    S.save();
     if(best){ setTimeout(()=>A.fx.win(),300); if(TG) TG.haptic("success"); }
     setScreen(UI.screenOver({ score, best, coins:earned, maxCombo, mode, target: (mode==="duel"&&duel)?duel.score:null }));
+    // тосты о заданиях/целях поверх
+    let delay=400;
+    doneQ.forEach(q=>{ const d=delay; delay+=1500; setTimeout(()=>{ A.fx.coin(); UI.toast(`✅ Задание: <b>${q.text}</b> — забери награду`); }, d); });
+    freshA.forEach(a=>{ const d=delay; delay+=1500; setTimeout(()=>{ A.fx.win(); if(TG)TG.haptic("success"); UI.toast(`🏅 Цель: <b>${a.text}</b> +${a.reward} 🪙`); }, d); });
   }
 
   function setScreen(html){ overlay.innerHTML=html; overlay.classList.remove("hidden"); }
-  function home(){ setScreen(UI.screenHome(duel)); }
+  function home(){
+    Q.ensureDaily(S.s, UI.dailyKeyNow(), RNG.todaySeed().seed); S.save();
+    setScreen(UI.screenHome(duel));
+  }
 
   // ввод: тап по полю = поставить блок
   wrap.addEventListener("pointerdown",(e)=>{ if(playing){ e.preventDefault(); game.tap(); } }, {passive:false});
@@ -77,7 +94,14 @@
       if(S.s.coins>=sk.cost){ S.addCoins(-sk.cost); S.own(sk.id); S.equip(sk.id); A.fx.coin(); setScreen(UI.screenShop()); }
       else { A.fx.over(); UI.toast("Не хватает монет 🪙"); } return; }
     if(el.dataset.equip){ S.equip(el.dataset.equip); A.fx.tap(); setScreen(UI.screenShop()); return; }
+    if(el.dataset.claimq){ const r=Q.claim(S.s, el.dataset.claimq); if(r>0){ S.addCoins(r); A.fx.coin(); if(TG)TG.haptic("success"); S.save(); home(); UI.toast(`+${r} 🪙 за задание`);} return; }
     const a=el.dataset.act; A.fx.tap();
+    if(a==="claim-reward"){
+      const k=UI.dailyKeyNow();
+      if(S.s.claimedRewardDay!==k){ S.touchDay(); const r=rewardFor(S.s.streak); S.s.claimedRewardDay=k; S.addCoins(r); S.save(); A.fx.coin(); if(TG)TG.haptic("success"); home(); UI.toast(`🎁 Ежедневная награда: <b>+${r} 🪙</b> · стрик ${S.s.streak}🔥`); }
+      return;
+    }
+    if(a==="open-achs"){ setScreen(UI.screenAchs()); return; }
     if(a==="play-endless") startMode("endless");
     else if(a==="play-daily") startMode("daily");
     else if(a==="play-duel" && duel) startMode("duel", duel.seed);

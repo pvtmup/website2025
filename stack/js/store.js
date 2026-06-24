@@ -10,6 +10,10 @@
     name: "",
     games: 0,
     sound: true,
+    claimedRewardDay: null,   // ежедневная награда
+    quests: null,             // дневные задания {key, items}
+    achdone: [],              // выполненные долгосрочные цели
+    totalPerfects: 0,         // всего перфектов (для целей)
   });
   let s = load();
   function load(){ try{ const r=localStorage.getItem(KEY); return r?Object.assign(fresh(),JSON.parse(r)):fresh(); }catch(e){ return fresh(); } }
