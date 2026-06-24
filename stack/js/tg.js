@@ -9,7 +9,7 @@
      Тогда дуэли/инвайты будут открываться прямо внутри Telegram.
      Пусто → фолбэк на веб-ссылку GitHub Pages. (см. TELEGRAM.md)
   ──────────────────────────────────────────────────────────── */
-  const APP_URL = "https://t.me/towerpvtmup";
+  const APP_URL = "https://t.me/towerappbot";
 
   function ready(){
     if(!wa) return;
