@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Коммерческое предложение — МАДО «Достык»</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+<style>
+  :root{
+    --ink:#12161c;
+    --muted:#5b6672;
+    --line:#e3e8ee;
+    --bg:#f4f6f9;
+    --card:#ffffff;
+    --brand:#0e5bd6;
+    --brand-soft:#eaf1fe;
+    --accent:#0aa06e;
+    --accent-soft:#e6f6ef;
+    --shadow:0 10px 40px rgba(20,30,50,.08);
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{background:var(--bg);color:var(--ink);font-family:"Inter",system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;-webkit-font-smoothing:antialiased;line-height:1.5}
+
+  .toolbar{
+    position:sticky;top:0;z-index:10;
+    display:flex;gap:10px;justify-content:center;align-items:center;
+    padding:12px;background:rgba(244,246,249,.85);backdrop-filter:blur(8px);
+    border-bottom:1px solid var(--line);
+  }
+  .toolbar button{
+    font:inherit;font-weight:600;font-size:14px;cursor:pointer;
+    padding:10px 18px;border-radius:10px;border:1px solid var(--line);
+    background:var(--card);color:var(--ink);transition:.15s;
+  }
+  .toolbar button.primary{background:var(--brand);color:#fff;border-color:var(--brand)}
+  .toolbar button:hover{transform:translateY(-1px);box-shadow:var(--shadow)}
+
+  .page{
+    max-width:820px;margin:24px auto;background:var(--card);
+    border:1px solid var(--line);border-radius:18px;box-shadow:var(--shadow);
+    overflow:hidden;
+  }
+
+  /* Header */
+  .hero{
+    padding:40px 48px 34px;
+    background:
+      radial-gradient(1200px 300px at 100% -40%, var(--brand-soft), transparent 60%),
+      linear-gradient(180deg,#fff,#fbfcfe);
+    border-bottom:1px solid var(--line);
+  }
+  .brandrow{display:flex;justify-content:space-between;align-items:flex-start;gap:24px;flex-wrap:wrap}
+  .logo{display:flex;align-items:center;gap:12px}
+  .logo .mark{
+    width:46px;height:46px;border-radius:12px;flex:none;
+    background:linear-gradient(135deg,var(--brand),#4f8dff);
+    display:grid;place-items:center;color:#fff;font-weight:800;font-size:20px;
+    box-shadow:0 6px 18px rgba(14,91,214,.35);
+  }
+  .logo .name{font-weight:800;font-size:18px;letter-spacing:.2px}
+  .logo .tag{font-size:12.5px;color:var(--muted);font-weight:500}
+  .doc-meta{text-align:right;font-size:13px;color:var(--muted)}
+  .doc-meta b{color:var(--ink)}
+
+  h1{font-size:30px;font-weight:800;letter-spacing:-.4px;margin:26px 0 6px}
+  .subtitle{font-size:15px;color:var(--muted);max-width:560px}
+
+  .parties{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:26px}
+  .party{
+    border:1px solid var(--line);border-radius:12px;padding:14px 16px;background:#fff;
+  }
+  .party .k{font-size:11px;text-transform:uppercase;letter-spacing:.8px;color:var(--muted);font-weight:700}
+  .party .v{font-size:15.5px;font-weight:700;margin-top:4px}
+  .party .s{font-size:13px;color:var(--muted);margin-top:2px}
+
+  /* Body */
+  .body{padding:34px 48px 40px}
+  .section+.section{margin-top:34px}
+  .section h2{
+    font-size:13px;text-transform:uppercase;letter-spacing:1px;color:var(--brand);
+    font-weight:800;margin-bottom:14px;display:flex;align-items:center;gap:10px;
+  }
+  .section h2::before{content:"";width:22px;height:2px;background:var(--brand);border-radius:2px}
+
+  .scope{display:grid;gap:12px}
+  .work{
+    display:flex;gap:14px;align-items:flex-start;
+    border:1px solid var(--line);border-radius:12px;padding:16px 18px;background:#fff;
+  }
+  .work .num{
+    width:30px;height:30px;flex:none;border-radius:9px;background:var(--brand-soft);
+    color:var(--brand);font-weight:800;display:grid;place-items:center;font-size:15px;
+  }
+  .work .t{font-weight:700;font-size:15.5px}
+  .work .d{font-size:13.5px;color:var(--muted);margin-top:3px}
+
+  .film{
+    border:1px solid var(--line);border-radius:14px;overflow:hidden;background:#fff;
+  }
+  .film .top{
+    padding:16px 20px;background:linear-gradient(135deg,#0e5bd6,#2b7bf0);color:#fff;
+    display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;
+  }
+  .film .top .n{font-weight:800;font-size:17px}
+  .film .top .badge{font-size:12px;font-weight:700;background:rgba(255,255,255,.18);padding:5px 11px;border-radius:999px}
+  .film .grid{display:grid;grid-template-columns:1fr 1fr;gap:1px;background:var(--line)}
+  .film .cell{background:#fff;padding:14px 18px}
+  .film .cell .k{font-size:12px;color:var(--muted);font-weight:600}
+  .film .cell .v{font-size:14.5px;font-weight:700;margin-top:2px}
+
+  /* Estimate table */
+  table{width:100%;border-collapse:collapse;font-size:14.5px}
+  thead th{
+    text-align:left;font-size:11.5px;text-transform:uppercase;letter-spacing:.6px;
+    color:var(--muted);font-weight:700;padding:10px 14px;border-bottom:2px solid var(--line);
+  }
+  thead th.r,tbody td.r,tfoot td.r{text-align:right}
+  tbody td{padding:14px;border-bottom:1px solid var(--line);vertical-align:top}
+  tbody td .t{font-weight:700}
+  tbody td .d{font-size:12.5px;color:var(--muted);margin-top:3px}
+  tfoot td{padding:16px 14px;font-weight:800;font-size:16px}
+  tfoot tr.total td{border-top:2px solid var(--ink)}
+  .total .sum{color:var(--brand);font-size:22px}
+
+  .note{
+    margin-top:14px;font-size:12.5px;color:var(--muted);
+    background:var(--accent-soft);border:1px solid #cdeede;border-radius:10px;padding:12px 14px;
+  }
+  .note b{color:var(--accent)}
+
+  .terms{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  .term{border:1px solid var(--line);border-radius:11px;padding:14px 16px;background:#fff}
+  .term .k{font-size:12px;color:var(--muted);font-weight:700}
+  .term .v{font-weight:700;font-size:14.5px;margin-top:3px}
+
+  ul.incl{list-style:none;display:grid;gap:9px}
+  ul.incl li{position:relative;padding-left:26px;font-size:14px}
+  ul.incl li::before{
+    content:"✓";position:absolute;left:0;top:0;color:var(--accent);font-weight:800;
+    width:18px;height:18px;background:var(--accent-soft);border-radius:5px;
+    display:grid;place-items:center;font-size:12px;
+  }
+
+  .cta{
+    margin-top:34px;border-radius:14px;padding:22px 24px;
+    background:linear-gradient(135deg,#0e1726,#1b2a44);color:#fff;
+    display:flex;justify-content:space-between;align-items:center;gap:18px;flex-wrap:wrap;
+  }
+  .cta .h{font-weight:800;font-size:17px}
+  .cta .s{font-size:13.5px;color:#b9c6da;margin-top:3px}
+  .cta .contacts{text-align:right;font-size:14px;line-height:1.7}
+  .cta .contacts b{font-weight:700}
+
+  .foot{padding:20px 48px 34px;color:var(--muted);font-size:12px;border-top:1px solid var(--line)}
+
+  @media (max-width:640px){
+    .hero,.body{padding-left:22px;padding-right:22px}
+    .foot{padding-left:22px;padding-right:22px}
+    .parties,.terms,.film .grid{grid-template-columns:1fr}
+    h1{font-size:24px}
+    .doc-meta{text-align:left}
+  }
+
+  @media print{
+    :root{--shadow:none}
+    .toolbar{display:none}
+    html,body{background:#fff}
+    .page{margin:0;border:none;border-radius:0;box-shadow:none;max-width:none}
+    .cta{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+    .film .top,.logo .mark{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+    .section{break-inside:avoid}
+  }
+</style>
+</head>
+<body>
+
+<div class="toolbar">
+  <button class="primary" onclick="window.print()">🖨 Печать / Сохранить в PDF</button>
+</div>
+
+<div class="page">
+
+  <!-- HEADER -->
+  <header class="hero">
+    <div class="brandrow">
+      <div class="logo">
+        <div class="mark">IE</div>
+        <div>
+          <div class="name">Illusion Exterior</div>
+          <div class="tag">Тонировка и архитектурные плёнки</div>
+        </div>
+      </div>
+      <div class="doc-meta">
+        <div><b>КП № 07-17</b></div>
+        <div>от 17 июля 2026 г.</div>
+        <div>действует 14 дней</div>
+      </div>
+    </div>
+
+    <h1>Коммерческое предложение</h1>
+    <p class="subtitle">Демонтаж старой плёнки и монтаж архитектурной плёнки Illusion Exterior на объекте заказчика.</p>
+
+    <div class="parties">
+      <div class="party">
+        <div class="k">Заказчик</div>
+        <div class="v">МАДО «Достык»</div>
+        <div class="s">Дошкольная организация</div>
+      </div>
+      <div class="party">
+        <div class="k">Исполнитель</div>
+        <div class="v">Illusion Exterior</div>
+        <div class="s">Профессиональный монтаж плёнок</div>
+      </div>
+    </div>
+  </header>
+
+  <!-- BODY -->
+  <div class="body">
+
+    <!-- SCOPE -->
+    <section class="section">
+      <h2>Состав работ</h2>
+      <div class="scope">
+        <div class="work">
+          <div class="num">1</div>
+          <div>
+            <div class="t">Демонтаж старой плёнки</div>
+            <div class="d">Снятие изношенного покрытия, удаление остатков клея, обезжиривание и подготовка поверхности стекла под новый монтаж.</div>
+          </div>
+        </div>
+        <div class="work">
+          <div class="num">2</div>
+          <div>
+            <div class="t">Монтаж плёнки Illusion Exterior</div>
+            <div class="d">Раскрой по размерам, наружная установка плёнки Illusion Exterior, разглаживание и финишная проверка качества по всей площади.</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- FILM -->
+    <section class="section">
+      <h2>Материал — Illusion Exterior</h2>
+      <div class="film">
+        <div class="top">
+          <div class="n">Illusion Exterior</div>
+          <div class="badge">Наружная архитектурная плёнка</div>
+        </div>
+        <div class="grid">
+          <div class="cell"><div class="k">Назначение</div><div class="v">Наружное нанесение на остекление</div></div>
+          <div class="cell"><div class="k">Защита</div><div class="v">Снижение УФ и солнечного нагрева</div></div>
+          <div class="cell"><div class="k">Эффект</div><div class="v">Опрятный внешний вид, приватность</div></div>
+          <div class="cell"><div class="k">Стойкость</div><div class="v">Устойчива к погоде и выцветанию</div></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ESTIMATE -->
+    <section class="section">
+      <h2>Смета</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>Наименование работ</th>
+            <th class="r">Площадь</th>
+            <th class="r">Цена за м²</th>
+            <th class="r">Стоимость</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>
+              <div class="t">Демонтаж старой плёнки + монтаж Illusion Exterior</div>
+              <div class="d">Полный цикл работ «под ключ» по площади остекления</div>
+            </td>
+            <td class="r">47,4 м²</td>
+            <td class="r">7 000 ₸</td>
+            <td class="r">331 800 ₸</td>
+          </tr>
+        </tbody>
+        <tfoot>
+          <tr class="total">
+            <td colspan="3" class="r">Итого к оплате</td>
+            <td class="r"><span class="sum">331 800 ₸</span></td>
+          </tr>
+        </tfoot>
+      </table>
+      <div class="note">
+        <b>Расчёт:</b> 47,4 м² × 7 000 ₸/м² = 331 800 ₸. Цена включает демонтаж старого покрытия и монтаж новой плёнки Illusion Exterior. Материал и работа — в стоимости.
+      </div>
+    </section>
+
+    <!-- TERMS -->
+    <section class="section">
+      <h2>Условия</h2>
+      <div class="terms">
+        <div class="term"><div class="k">Срок выполнения</div><div class="v">1–2 рабочих дня</div></div>
+        <div class="term"><div class="k">Гарантия на работы</div><div class="v">По договору</div></div>
+        <div class="term"><div class="k">Оплата</div><div class="v">По согласованию сторон</div></div>
+        <div class="term"><div class="k">Срок действия КП</div><div class="v">14 календарных дней</div></div>
+      </div>
+    </section>
+
+    <!-- INCLUDED -->
+    <section class="section">
+      <h2>Что входит в стоимость</h2>
+      <ul class="incl">
+        <li>Демонтаж старой плёнки и очистка поверхности</li>
+        <li>Материал — плёнка Illusion Exterior</li>
+        <li>Профессиональный монтаж по всей площади 47,4 м²</li>
+        <li>Уборка рабочей зоны после завершения</li>
+      </ul>
+    </section>
+
+    <!-- CTA -->
+    <div class="cta">
+      <div>
+        <div class="h">Готовы приступить к работам</div>
+        <div class="s">Согласуем дату выезда и оформим договор в удобное для вас время.</div>
+      </div>
+      <div class="contacts">
+        <div><b>Illusion Exterior</b></div>
+        <div>Телефон: ____________</div>
+        <div>WhatsApp: ____________</div>
+      </div>
+    </div>
+
+  </div>
+
+  <footer class="foot">
+    Коммерческое предложение носит информационный характер и не является публичной офертой. Итоговые условия фиксируются договором. © 2026 Illusion Exterior.
+  </footer>
+
+</div>
+
+</body>
+</html>
